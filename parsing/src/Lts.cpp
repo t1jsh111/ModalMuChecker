@@ -26,11 +26,11 @@ void Lts::addTransition(int startState, std::string label, int endState) {
     endStateToTransitions.at(endState).insert(transition);
 }
 
-std::set<std::shared_ptr<Lts::Transition>> Lts::getTransitionsOfStartState(int startState) const {
+const std::set<std::shared_ptr<Lts::Transition>> & Lts::getTransitionsOfStartState(int startState) const {
     return startStateToTransitions.at(startState);
 }
 
-std::set<std::shared_ptr<Lts::Transition>> Lts::getTransitionsOfEndState(int endState) const {
+const std::set<std::shared_ptr<Lts::Transition>> & Lts::getTransitionsOfEndState(int endState) const {
     return endStateToTransitions.at(endState);
 }
 

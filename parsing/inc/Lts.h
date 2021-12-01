@@ -19,8 +19,8 @@ public:
     Lts(int initialState, int nrOfTransitions, int nrOfStates);
 
     void addTransition(int startState, std::string label, int endState);
-    std::set<std::shared_ptr<Transition>> getTransitionsOfStartState(int startState) const;
-    std::set<std::shared_ptr<Transition>> getTransitionsOfEndState(int endState) const;
+    const std::set<std::shared_ptr<Transition>> & getTransitionsOfStartState(int startState) const;
+    const std::set<std::shared_ptr<Transition>> & getTransitionsOfEndState(int endState) const;
 
     void printTransitionsOfStartState(int startState) const;
     void printTransitionsOfEndState(int endState) const;
