@@ -28,7 +28,7 @@ namespace parser_space {
         ACTION_LABEL,
     };
 
-    static const std::vector<std::string> tokenTypeToString = {
+    static const char* tokenTypeToString[] = {
             "WHITESPACE",
             "TRUE_LITERAL",
             "FALSE_LITERAL",

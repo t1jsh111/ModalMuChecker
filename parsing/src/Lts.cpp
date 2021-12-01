@@ -2,7 +2,7 @@
 // Created by tijsh on 27-11-2021.
 //
 
-#include "Lts.h"
+#include "../inc/Lts.h"
 #include <iostream>
 
 Lts::Lts(int initialState, int nrOfTransitions, int nrOfStates) :
@@ -26,11 +26,11 @@ void Lts::addTransition(int startState, std::string label, int endState) {
     endStateToTransitions.at(endState).insert(transition);
 }
 
-const std::set<std::shared_ptr<Lts::Transition>>& Lts::getTransitionsOfStartState(int startState) const {
+std::set<std::shared_ptr<Lts::Transition>> Lts::getTransitionsOfStartState(int startState) const {
     return startStateToTransitions.at(startState);
 }
 
-const std::set<std::shared_ptr<Lts::Transition>>& Lts::getTransitionsOfEndState(int endState) const {
+std::set<std::shared_ptr<Lts::Transition>> Lts::getTransitionsOfEndState(int endState) const {
     return endStateToTransitions.at(endState);
 }
 

@@ -2,7 +2,7 @@
 // Created by Tijs Hoeijmakers on 01/12/2021.
 //
 
-#include "Tokenizer.h"
+#include "../inc/Tokenizer.h"
 
 #include <iostream>
 
@@ -15,7 +15,6 @@ namespace parser_space {
     std::vector<Token> Tokenizer::parse(const std::string &modalFormula) {
         std::vector<Token> tokens;
         Token currentToken;
-        std::string doge;
 
         for (int i = 0; i < modalFormula.length(); i++) {
             const char &currCh = modalFormula[i];
@@ -122,6 +121,7 @@ namespace parser_space {
                     endtoken(currentToken, tokens);
                     currentToken.mType = RIGHT_BOX_BRACKET;
                     endtoken(currentToken, tokens);
+                    break;
                 case '<':
                     currentToken.mType = LEFT_DIAMOND_BRACKET;
                     endtoken(currentToken, tokens);
@@ -132,8 +132,6 @@ namespace parser_space {
                     endtoken(currentToken, tokens);
                     break;
                 case '&':
-                    doge = modalFormula.substr(i, 2);
-                    std::cout << modalFormula.substr(i, 2);
                     if (modalFormula.substr(i, 2) == "&&") {
                         currentToken.mType = AND_OPERATOR;
                         endtoken(currentToken, tokens);
