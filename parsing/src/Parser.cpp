@@ -2,8 +2,8 @@
 // Created by tijsh on 26-11-2021.
 //
 
-#include "../inc/Parser.h"
-#include "../inc/Formula.h"
+#include "Parser.h"
+#include "Formula.h"
 #include <iostream>
 #include <sstream>
 
@@ -84,7 +84,7 @@ namespace parser_space {
     }
 
 
-    void Parser::parseFormulaFile(const std::string &filePath) {
+    std::shared_ptr<Formula> Parser::parseFormulaFile(const std::string &filePath) {
         std::ifstream formulaFile(filePath);
 
         if (!formulaFile.is_open()) {
@@ -97,15 +97,17 @@ namespace parser_space {
 
         Tokenizer tokenizer;
 
-        // Function Call
+
         auto tokenized = tokenizer.parse(str);
 
-        for (auto token : tokenized) {
-            token.debugPrint();
-            std::cout << std::endl;
-        }
-        auto form = parseFormula(tokenized);
-        form->printFormula();
+        return parseFormula(tokenized);
+    }
+
+    std::shared_ptr<Formula> Parser::parseFormula(const std::string& formula) {
+        Tokenizer tokenizer;
+        auto tokenized = tokenizer.parse(formula);
+
+        return parseFormula(tokenized);
     }
 
     std::shared_ptr<Formula> Parser::parseFormula(std::vector<Token> &tokens) {
@@ -157,8 +159,7 @@ namespace parser_space {
                     auto fixedPointVariable = std::shared_ptr<FixedPointVariable>(
                             new FixedPointVariable(tokens[i].mText[0]));
                     auto formula = parseFormula(tokens, ++i);
-                    return std::make_shared<FixedPoint>(FixedPoint::FixedPointType::mu,
-                                                        fixedPointVariable, formula);
+                    return std::make_shared<MinFixedPoint>(fixedPointVariable, formula);
                     break;
                 }
                 case NU_LITERAL: {
@@ -169,8 +170,7 @@ namespace parser_space {
                     auto fixedPointVariable = std::shared_ptr<FixedPointVariable>(
                             new FixedPointVariable(tokens[i].mText[0]));
                     auto formula = parseFormula(tokens, ++i);
-                    return std::make_shared<FixedPoint>(FixedPoint::FixedPointType::nu,
-                                                        fixedPointVariable, formula);
+                    return std::make_shared<MaxFixedPoint>(fixedPointVariable, formula);
                     break;
                 }
                 case LEFT_DIAMOND_BRACKET: {
@@ -208,6 +208,8 @@ namespace parser_space {
         }
         throw std::runtime_error("Should not be reachable");
     }
+
+
 
 
 }

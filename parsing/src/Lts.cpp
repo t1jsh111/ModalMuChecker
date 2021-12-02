@@ -2,7 +2,7 @@
 // Created by tijsh on 27-11-2021.
 //
 
-#include "../inc/Lts.h"
+#include "Lts.h"
 #include <iostream>
 
 Lts::Lts(int initialState, int nrOfTransitions, int nrOfStates) :

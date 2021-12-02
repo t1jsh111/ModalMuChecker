@@ -2,7 +2,7 @@
 // Created by Tijs Hoeijmakers on 01/12/2021.
 //
 
-#include "../inc/Tokenizer.h"
+#include "Tokenizer.h"
 
 #include <iostream>
 

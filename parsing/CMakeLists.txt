@@ -1,5 +1,4 @@
 set(SOURCE_FILES
-        src/Formula.cpp
         src/Lts.cpp
         src/Parser.cpp
         src/Tokenizer.cpp)
@@ -11,4 +10,4 @@ set(HEADER_FILES
         inc/Tokenizer.h)
 
 add_library(ParsingLibrary ${SOURCE_FILES})
-target_include_directories(ParsingLibrary PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(ParsingLibrary PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc)

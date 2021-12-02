@@ -15,7 +15,8 @@ namespace parser_space {
     public:
         static Lts parseLts(const std::string &filePath);
 
-        static void parseFormulaFile(const std::string &filePath);
+        static std::shared_ptr<Formula> parseFormulaFile(const std::string &filePath);
+        static std::shared_ptr<Formula> parseFormula(const std::string& formula);
 
     private:
         static std::string getElementOfTuple(std::string tuple, int index);
