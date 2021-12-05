@@ -187,6 +187,10 @@ public:
         return mFormula;
     }
 
+    const std::string &getMActionLabel() const {
+        return mActionLabel;
+    }
+
     std::vector<MaxFixedPoint> getMaxFixedPointFormulas() const override{
         return mFormula->getMaxFixedPointFormulas();
     }
@@ -213,6 +217,10 @@ public:
 
     const std::shared_ptr<Formula> &getMFormula() const {
         return mFormula;
+    }
+
+    const std::string &getMActionLabel() const {
+        return mActionLabel;
     }
 
     std::vector<MaxFixedPoint> getMaxFixedPointFormulas() const override{

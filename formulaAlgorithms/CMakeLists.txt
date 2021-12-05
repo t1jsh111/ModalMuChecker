@@ -1,7 +1,7 @@
 set(SOURCE_FILES
         src/NestingDepthCalculator.cpp
         src/AlternatingNestingDepthCalculator.cpp
-        )
+        inc/NaiveAlgorithm.h src/NaiveAlgorithm.cpp)
 
 set(HEADER_FILES
         inc/NestingDepthCalculator.h
