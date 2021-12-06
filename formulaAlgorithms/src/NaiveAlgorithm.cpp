@@ -23,11 +23,16 @@ std::set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts,
             return empty;
             break;
         }
-        case Formula::FixedPointVariableType:
-            const auto& fixedPointVariable = dynamic_cast<const FixedPointVariable&>(formula);
-            char var = fixedPointVariable.getFixedPointVariable();
-            //return 0;
+        case Formula::FixedPointVariableType: {
+            char var = dynamic_cast<const FixedPointVariable &>(formula).getFixedPointVariable();
+            for (int i = 0; i < sizeof A; i++) {
+                if (A[i].first == var) {
+                    return A[i].second;
+                    break;
+                }
+            }
             break;
+        }
         case Formula::ConjunctionType: { // Return eval(g1) n eval(g2)
             const auto& conjunction = dynamic_cast<const Conjunction&>(formula);
             std::set<int> evalLeft = evaluate(*conjunction.getMLeftFormula(), lts, A);
