@@ -27,6 +27,7 @@ public:
     FormulaType getFormulaType() const {return mFormulatype;}
 
     virtual void printFormula() const = 0;
+    virtual char getFixedPointVariable() const = 0;
     virtual std::vector<MaxFixedPoint> getMaxFixedPointFormulas() const = 0;
     virtual std::vector<MinFixedPoint> getMinFixedPointFormulas() const = 0;
 
@@ -73,6 +74,11 @@ public:
     void printFormula() const override {
         std::cout << mFixedPointVariable;
     }
+
+    char getFixedPointVariable() const override{
+        return mFixedPointVariable;
+    }
+
     std::vector<MaxFixedPoint> getMaxFixedPointFormulas() const override{
         return std::vector<MaxFixedPoint>();
     }

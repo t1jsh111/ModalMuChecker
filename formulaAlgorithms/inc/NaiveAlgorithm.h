@@ -12,7 +12,7 @@ class Formula;
 
 class NaiveAlgorithm {
 public:
-    static std::set<int> evaluate(const Formula & formula, const Lts & lts, bool * A);
+    static std::set<int> evaluate(const Formula & formula, const Lts & lts, std::pair<char, std::set<int>> * A);
 };
 
 #endif //MODALMUCHECKER_NAIVEALGORITHM_H

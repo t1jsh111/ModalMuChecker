@@ -7,7 +7,7 @@
 #include "Lts.h"
 #include <set>
 
-std::set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts, bool * A) {
+std::set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts, std::pair<char, std::set<int>> * A) {
     const Formula::FormulaType& formulaType = formula.getFormulaType();
     switch (formulaType) {
         case Formula::TrueType: { // Return S
@@ -24,6 +24,8 @@ std::set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts,
             break;
         }
         case Formula::FixedPointVariableType:
+            const auto& fixedPointVariable = dynamic_cast<const FixedPointVariable&>(formula);
+            char var = fixedPointVariable.getFixedPointVariable();
             //return 0;
             break;
         case Formula::ConjunctionType: { // Return eval(g1) n eval(g2)
@@ -34,7 +36,6 @@ std::set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts,
             for (int i : evalLeft) {
                 if (evalRight.find(i) != evalRight.end()) {
                     conjunct.emplace(i);
-                    break;
                 }
             }
             return conjunct;
@@ -57,6 +58,7 @@ std::set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts,
                 for (std::shared_ptr<Lts::Transition> t : transitions) {
                     if (t->label == label && eval.find(t->endState) == eval.end()) { // s -a-> t =/=> t in eval(g)
                         emplace = false;
+                        break;
                     }
                 }
                 if (emplace) { // Only add s if All t in S: s -a-> t ==> t in eval(g)
