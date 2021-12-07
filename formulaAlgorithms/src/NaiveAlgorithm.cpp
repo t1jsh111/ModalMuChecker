@@ -16,19 +16,16 @@ std::set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts,
                 S.emplace(i);
             }
             return S;
-            break;
         }
         case Formula::FalseType: { // Return Empty set
             std::set<int> empty;
             return empty;
-            break;
         }
-        case Formula::FixedPointVariableType: {
+        case Formula::FixedPointVariableType: { // Return A[i]
             char var = dynamic_cast<const FixedPointVariable &>(formula).getFixedPointVariable();
             for (int i = 0; i < sizeof A; i++) {
                 if (A[i].first == var) {
                     return A[i].second;
-                    break;
                 }
             }
             break;
@@ -44,24 +41,29 @@ std::set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts,
                 }
             }
             return conjunct;
-            break;
         }
-        /*case Formula::DisjunctionType: {
+        case Formula::DisjunctionType: {
             const auto& disjunction = dynamic_cast<const Disjunction&>(formula);
-            return std::max(computeAlternatingNestingDepth(*disjunction.getMLeftFormula()),
-                            computeAlternatingNestingDepth(*disjunction.getMRightFormula()));
-            break;
-        }*/
+            std::set<int> evalLeft = evaluate(*disjunction.getMLeftFormula(), lts, A);
+            std::set<int> evalRight = evaluate(*disjunction.getMRightFormula(), lts, A);
+            std::set<int> disjunct = evalLeft;
+            for (int i : evalRight) {
+                if (disjunct.find(i) == disjunct.end()) {
+                    disjunct.emplace(i);
+                }
+            }
+            return disjunct;
+        }
         case Formula::BoxType: { // {s in S | All t in S: s -a-> t ==> t in eval(g)}
             const auto &box = dynamic_cast<const Box &>(formula);
             std::set<int> eval = evaluate(*box.getMFormula(), lts, A);
-            std::string label = box.getMActionLabel();
+            std::string label = '"' + box.getMActionLabel() + '"';
             std::set<int> boxed;
             for (int i = 0; i < lts.nrOfStates; i++) {
                 const std::set<std::shared_ptr<Lts::Transition>> transitions = lts.getTransitionsOfStartState(i);
                 bool emplace = true;
                 for (std::shared_ptr<Lts::Transition> t : transitions) {
-                    if (t->label == label && eval.find(t->endState) == eval.end()) { // s -a-> t =/=> t in eval(g)
+                    if (t->label.compare(label) == 0 && eval.find(t->endState) == eval.end()) { // s -a-> t =/=> t in eval(g)
                         emplace = false;
                         break;
                     }
@@ -71,13 +73,23 @@ std::set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts,
                 }
             }
             return boxed;
-            break;
         }
-        /*case Formula::DiamondType: {
+        case Formula::DiamondType: {
             const auto &diamond = dynamic_cast<const Diamond &>(formula);
-            return computeAlternatingNestingDepth(*diamond.getMFormula());
-            break;
-        }*/
+            std::set<int> eval = evaluate(*diamond.getMFormula(), lts, A);
+            std::string label = '"' + diamond.getMActionLabel() + '"';
+            std::set<int> diamonded;
+            for (int i = 0; i < lts.nrOfStates; i++) {
+                const std::set<std::shared_ptr<Lts::Transition>> transitions = lts.getTransitionsOfStartState(i);
+                for (std::shared_ptr<Lts::Transition> t : transitions) {
+                    if (t->label.compare(label) == 0 && eval.find(t->endState) != eval.end()) { // s -a-> t & t in eval(g)
+                        diamonded.emplace(i);
+                        break;
+                    }
+                }
+            }
+            return diamonded;
+        }
         /*case Formula::MinFixedPointType: {
             const auto &fixedPoint = dynamic_cast<const MinFixedPoint &>(formula);
             int alternationDepth = std::max(1, computeAlternatingNestingDepth(*fixedPoint.getMFormula()));
@@ -89,21 +101,32 @@ std::set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts,
             return alternationDepth;
             break;
         }*/
-        case Formula::MaxFixedPointType: {
+        /*case Formula::MaxFixedPointType: {
             const auto &fixedPoint = dynamic_cast<const MaxFixedPoint &>(formula);
-            int alternationDepth = std::max(1, computeAlternatingNestingDepth(*fixedPoint.getMFormula()));
-            auto minFixedPoints = fixedPoint.getMFormula()->getMinFixedPointFormulas();
-            for(const auto& minFixedPoint : minFixedPoints) {
-                alternationDepth = std::max(alternationDepth, 1 + computeAlternatingNestingDepth(minFixedPoint));
+            char var = fixedPoint.getFixedPointVariable();
+            int i = sizeof A;
+
+            // A[i] := S
+            std::set<int> S;
+            for (int j = 0; j < lts.nrOfStates; j++) {
+                S.emplace(j);
+            }
+            A[i] = std::pair<char, std::set<int>> (var, S);
+
+            std::set<int> X;
+            while (X != A[i].second) {
+                X = A[i].second; // X' := A[i]
+                A[i].second = evaluate(*fixedPoint.getMFormula(), lts, A); // A[i] := eval(g)
             }
 
-            return alternationDepth;
-        }
+            return A[i].second;
+        }*/
         default:
             throw std::runtime_error("This should not be reachable. Switch statement not exhaustive...");
     }
 
-    return 0;
+    std::set<int> empty;
+    return empty;
 
 }
 

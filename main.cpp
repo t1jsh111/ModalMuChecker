@@ -5,6 +5,7 @@
 #include <iostream>
 #include "NestingDepthCalculator.h"
 #include "AlternatingNestingDepthCalculator.h"
+#include "NaiveAlgorithm.h"
 
 int main() {
 
@@ -42,7 +43,13 @@ int main() {
     std::cout << "Nesting depth: " << NestingDepthCalculator::computeNestingDepth(*slideExample2) << std::endl;
     std::cout << "Alternating depth: " << AlternatingNestingDepthCalculator::computeAlternatingNestingDepth(*slideExample2) << std::endl;
 
-
+    form = parser_space::Parser::parseFormulaFile("resources/testcases/modal_operators/form5.mcf");
+    Lts test(parser_space::Parser::parseLts("resources/testcases/modal_operators/test.aut"));
+    std::pair<char, std::set<int>> * A;
+    std::set<int> result = NaiveAlgorithm::evaluate(*form, test, A);
+    for (int i : result) {
+        std::cout << "vertex: " << i << std::endl;
+    }
 
     return 0;
 }

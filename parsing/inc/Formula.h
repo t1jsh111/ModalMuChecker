@@ -11,6 +11,7 @@
 #include <iostream>
 #include <set>
 #include <unordered_set>
+#include <memory>
 
 /*
  * Note that this is header only (implementation included in header)
@@ -27,7 +28,7 @@ public:
     FormulaType getFormulaType() const {return mFormulatype;}
 
     virtual void printFormula() const = 0;
-    virtual char getFixedPointVariable() const = 0;
+    //virtual char getFixedPointVariable() const = 0;
     virtual std::vector<MaxFixedPoint> getMaxFixedPointFormulas() const = 0;
     virtual std::vector<MinFixedPoint> getMinFixedPointFormulas() const = 0;
 
@@ -75,7 +76,7 @@ public:
         std::cout << mFixedPointVariable;
     }
 
-    char getFixedPointVariable() const override{
+    char getFixedPointVariable() const {
         return mFixedPointVariable;
     }
 
@@ -258,6 +259,10 @@ public:
     const std::shared_ptr<Formula> &getMFormula() const {
         return mFormula;
     }
+
+    /*char getFixedPointVariable() const override{
+        return mFixedPointVariable.;
+    }*/
 
     std::vector<MaxFixedPoint> getMaxFixedPointFormulas() const override{
         auto maxFixedPoints = mFormula->getMaxFixedPointFormulas();
