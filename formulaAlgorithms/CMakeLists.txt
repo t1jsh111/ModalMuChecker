@@ -1,11 +1,15 @@
 set(SOURCE_FILES
         src/NestingDepthCalculator.cpp
         src/AlternatingNestingDepthCalculator.cpp
-        inc/NaiveAlgorithm.h src/NaiveAlgorithm.cpp)
+        src/DependentAlternationDepthCalculator.cpp
+        src/NaiveAlgorithm.cpp
+        )
 
 set(HEADER_FILES
         inc/NestingDepthCalculator.h
         inc/AlternatingNestingDepthCalculator.h
+        inc/DependentAlternationDepthCalculator.h
+        inc/NaiveAlgorithm.h
         )
 
 add_library(FormulaAlgorithmsLibrary ${SOURCE_FILES})

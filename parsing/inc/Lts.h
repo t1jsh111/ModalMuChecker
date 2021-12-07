@@ -31,6 +31,8 @@ public:
 
     int getNrOfStates() const;
 
+    const std::set<int> &getStates() const;
+
     struct Transition {
         int startingState;
         std::string label;
@@ -43,6 +45,9 @@ public:
     int initialState;
     int nrOfTransitions;
     int nrOfStates;
+
+    std::set<int> states;
+
 
     std::map<int, std::set<std::shared_ptr<Transition>>> startStateToTransitions;
     std::map<int, std::set<std::shared_ptr<Transition>>> endStateToTransitions;

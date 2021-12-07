@@ -6,6 +6,8 @@
 #include "NestingDepthCalculator.h"
 #include "AlternatingNestingDepthCalculator.h"
 #include "NaiveAlgorithm.h"
+#include "DependentAlternationDepthCalculator.h"
+
 
 int main() {
 
@@ -21,10 +23,38 @@ int main() {
     std::cout << std::endl;
     auto minFix = form->getMaxFixedPointFormulas();
 
-    for(const auto& form : minFix) {
-        form.printFormula();
-        std::cout << std::endl;
-    }
+
+//    std::cout << "------------" << std::endl;
+//    auto slideExample1 = parser_space::Parser::parseFormula("(nu X. mu Y. nu Z. (X || Y) && nu X. mu Y. nu Z. (X || Y))");
+//
+//    auto maxFix = slideExample1->getMaxFixedPointFormulas();
+//    slideExample1->printFormula();
+//    std::cout << std::endl;
+//
+//
+//
+//    for(const auto& form : maxFix) {
+//        std::cout << " subformula: " ;
+//        form.get().printFormula();
+//        std::cout << std::endl;
+//
+//        const auto& freevars = form.get().getFreeFixedPointVariables();
+//        std::cout << "free fixed point variables" << std::endl;
+//        for(const auto& freevar : freevars) {
+//            freevar.get().printFormula();
+//        }
+//        std::cout << std::endl;
+//
+//        const auto& allvars = form.get().getFixedPointVariables();
+//        std::cout << "free fixed point variables" << std::endl;
+//        for(const auto& var : allvars) {
+//            var.get().printFormula();
+//        }
+//        std::cout << std::endl;
+//
+//        std::cout << "address form" << &form.get() << std::endl;
+//    }
+
 
 
     std::cout << "Equality check: first " << &minFix[0] << "second" << &form;
@@ -34,7 +64,7 @@ int main() {
     std::cout << std::endl;
     std::cout << "Nesting depth: " << NestingDepthCalculator::computeNestingDepth(*slideExample1) << std::endl;
     std::cout << "Alternating depth: " << AlternatingNestingDepthCalculator::computeAlternatingNestingDepth(*slideExample1) << std::endl;
-
+    std::cout << "depending alternating depth: " << DependentAlternationDepthCalculator::computeDependentAlternatingNestingDepth(*slideExample1) << std::endl;
 
 
     auto slideExample2 = parser_space::Parser::parseFormula("(mu A. nu B. (A || B) && mu C. nu D. (C && mu E. (true || E)))");
@@ -42,6 +72,7 @@ int main() {
     std::cout << std::endl;
     std::cout << "Nesting depth: " << NestingDepthCalculator::computeNestingDepth(*slideExample2) << std::endl;
     std::cout << "Alternating depth: " << AlternatingNestingDepthCalculator::computeAlternatingNestingDepth(*slideExample2) << std::endl;
+    std::cout << "depending alternating depth: " << DependentAlternationDepthCalculator::computeDependentAlternatingNestingDepth(*slideExample2) << std::endl;
 
     form = parser_space::Parser::parseFormulaFile("resources/testcases/modal_operators/form5.mcf");
     Lts test(parser_space::Parser::parseLts("resources/testcases/modal_operators/test.aut"));

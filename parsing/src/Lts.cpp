@@ -8,7 +8,9 @@
 Lts::Lts(int initialState, int nrOfTransitions, int nrOfStates) :
     initialState(initialState), nrOfTransitions(nrOfTransitions), nrOfStates(nrOfStates)
 {
-
+    for(int i = 0; i < nrOfStates; i++) {
+        this->states.insert(i);
+    }
 }
 
 void Lts::addTransition(int startState, std::string label, int endState) {
@@ -58,6 +60,10 @@ void Lts::printTransitionsOfEndState(int endState) const {
     for(const auto& transition : transitions) {
         transition->printTransition();
     }
+}
+
+const std::set<int>& Lts::getStates() const {
+    return states;
 }
 
 

@@ -12,6 +12,7 @@
 #include <set>
 #include <unordered_set>
 #include <memory>
+#include <list>
 
 /*
  * Note that this is header only (implementation included in header)
@@ -19,6 +20,9 @@
  * */
 class MaxFixedPoint;
 class MinFixedPoint;
+class FixedPointVariable;
+struct FixedPointVariableHashFunction;
+
 
 class Formula {
 public:
@@ -28,12 +32,63 @@ public:
     FormulaType getFormulaType() const {return mFormulatype;}
 
     virtual void printFormula() const = 0;
-    //virtual char getFixedPointVariable() const = 0;
-    virtual std::vector<MaxFixedPoint> getMaxFixedPointFormulas() const = 0;
-    virtual std::vector<MinFixedPoint> getMinFixedPointFormulas() const = 0;
+    virtual std::vector<std::reference_wrapper<const MaxFixedPoint>> getMaxFixedPointFormulas() const = 0;
+    virtual std::vector<std::reference_wrapper<const MinFixedPoint>> getMinFixedPointFormulas() const = 0;
+    virtual std::list<std::reference_wrapper<const FixedPointVariable>>
+    getFixedPointVariables() const = 0;
+    virtual std::list<std::reference_wrapper<const FixedPointVariable>>
+    getFreeFixedPointVariables() const = 0;
 
     const FormulaType mFormulatype;
 };
+
+
+class FixedPointVariable : public Formula {
+    friend FixedPointVariableHashFunction;
+public:
+    explicit FixedPointVariable(const char fixedPointVariable) : Formula(FixedPointVariableType), mFixedPointVariable(fixedPointVariable){}
+
+    void printFormula() const override {
+        std::cout << mFixedPointVariable;
+    }
+
+    std::vector<std::reference_wrapper<const MaxFixedPoint>> getMaxFixedPointFormulas() const override{
+        return std::vector<std::reference_wrapper<const MaxFixedPoint>>();
+    }
+
+    std::vector<std::reference_wrapper<const MinFixedPoint>> getMinFixedPointFormulas() const override{
+        return std::vector<std::reference_wrapper<const MinFixedPoint>>();
+    }
+
+    std::list<std::reference_wrapper<const FixedPointVariable>>
+    getFixedPointVariables() const override {
+        return {*this};
+    }
+
+    std::list<std::reference_wrapper<const FixedPointVariable>>
+    getFreeFixedPointVariables() const override {
+        return {*this};
+    }
+
+    bool operator==(const FixedPointVariable& rhs) const {
+        return mFixedPointVariable == rhs.mFixedPointVariable;
+    }
+
+
+private:
+    const char mFixedPointVariable;
+};
+
+
+
+struct FixedPointVariableHashFunction{
+    size_t operator()(const FixedPointVariable& a) const {
+        size_t xHash = std::hash<char>()(a.mFixedPointVariable);
+        return xHash;
+    }
+};
+
+
 
 class True : public Formula{
 public:
@@ -42,13 +97,22 @@ public:
     void printFormula() const override {
         std::cout << "True";
     }
-
-    std::vector<MaxFixedPoint> getMaxFixedPointFormulas() const override{
-        return std::vector<MaxFixedPoint>();
+    std::vector<std::reference_wrapper<const MaxFixedPoint>> getMaxFixedPointFormulas() const override{
+        return std::vector<std::reference_wrapper<const MaxFixedPoint>>();
     }
 
-    std::vector<MinFixedPoint> getMinFixedPointFormulas() const override{
-        return std::vector<MinFixedPoint>();
+    std::vector<std::reference_wrapper<const MinFixedPoint>> getMinFixedPointFormulas() const override{
+        return std::vector<std::reference_wrapper<const MinFixedPoint>>();
+    }
+
+    std::list<std::reference_wrapper<const FixedPointVariable>>
+    getFixedPointVariables() const override {
+        return std::list<std::reference_wrapper<const FixedPointVariable>>();
+    }
+
+    std::list<std::reference_wrapper<const FixedPointVariable>>
+            getFreeFixedPointVariables() const override {
+        return std::list<std::reference_wrapper<const FixedPointVariable>>();
     }
 };
 
@@ -59,38 +123,33 @@ public:
     void printFormula() const override {
         std::cout << "False";
     }
-    std::vector<MaxFixedPoint> getMaxFixedPointFormulas() const override{
-        return std::vector<MaxFixedPoint>();
-    }
 
-    std::vector<MinFixedPoint> getMinFixedPointFormulas() const override{
-        return std::vector<MinFixedPoint>();
-    }
-};
-
-class FixedPointVariable : public Formula {
-public:
-    explicit FixedPointVariable(const char fixedPointVariable) : Formula(FixedPointVariableType), mFixedPointVariable(fixedPointVariable){}
-
-    void printFormula() const override {
-        std::cout << mFixedPointVariable;
-    }
 
     char getFixedPointVariable() const {
         return mFixedPointVariable;
     }
 
-    std::vector<MaxFixedPoint> getMaxFixedPointFormulas() const override{
-        return std::vector<MaxFixedPoint>();
+
+    std::vector<std::reference_wrapper<const MaxFixedPoint>> getMaxFixedPointFormulas() const override{
+        return std::vector<std::reference_wrapper<const MaxFixedPoint>>();
     }
 
-    std::vector<MinFixedPoint> getMinFixedPointFormulas() const override{
-        return std::vector<MinFixedPoint>();
+    std::vector<std::reference_wrapper<const MinFixedPoint>> getMinFixedPointFormulas() const override{
+        return std::vector<std::reference_wrapper<const MinFixedPoint>>();
     }
 
-private:
-    const char mFixedPointVariable;
+    std::list<std::reference_wrapper<const FixedPointVariable>>
+    getFixedPointVariables() const override {
+        return std::list<std::reference_wrapper<const FixedPointVariable>>();
+    }
+
+    std::list<std::reference_wrapper<const FixedPointVariable>>
+    getFreeFixedPointVariables() const override {
+        return std::list<std::reference_wrapper<const FixedPointVariable>>();
+    }
 };
+
+
 
 class Conjunction : public Formula {
 public:
@@ -113,7 +172,7 @@ public:
         return mRightFormula;
     }
 
-    std::vector<MaxFixedPoint> getMaxFixedPointFormulas() const override{
+    std::vector<std::reference_wrapper<const MaxFixedPoint>> getMaxFixedPointFormulas() const override{
         auto left = mLeftFormula->getMaxFixedPointFormulas();
         auto right = mRightFormula->getMaxFixedPointFormulas();
         std::copy(right.begin(), right.end(), std::back_inserter(left));
@@ -121,9 +180,27 @@ public:
         return left;
     }
 
-    std::vector<MinFixedPoint> getMinFixedPointFormulas() const override{
+    std::vector<std::reference_wrapper<const MinFixedPoint>> getMinFixedPointFormulas() const override{
         auto left = mLeftFormula->getMinFixedPointFormulas();
         auto right = mRightFormula->getMinFixedPointFormulas();
+        std::copy(right.begin(), right.end(), std::back_inserter(left));
+
+        return left;
+    }
+
+    std::list<std::reference_wrapper<const FixedPointVariable>>
+    getFixedPointVariables() const override {
+        auto left = mLeftFormula->getFixedPointVariables();
+        auto right = mRightFormula->getFixedPointVariables();
+        std::copy(right.begin(), right.end(), std::back_inserter(left));
+
+        return left;
+    }
+
+    std::list<std::reference_wrapper<const FixedPointVariable>>
+    getFreeFixedPointVariables() const override {
+        auto left = mLeftFormula->getFreeFixedPointVariables();
+        auto right = mRightFormula->getFreeFixedPointVariables();
         std::copy(right.begin(), right.end(), std::back_inserter(left));
 
         return left;
@@ -157,7 +234,7 @@ public:
         return mRightFormula;
     }
 
-    std::vector<MaxFixedPoint> getMaxFixedPointFormulas() const override{
+    std::vector<std::reference_wrapper<const MaxFixedPoint>> getMaxFixedPointFormulas() const override{
         auto left = mLeftFormula->getMaxFixedPointFormulas();
         auto right = mRightFormula->getMaxFixedPointFormulas();
         std::copy(right.begin(), right.end(), std::back_inserter(left));
@@ -165,7 +242,7 @@ public:
         return left;
     }
 
-    std::vector<MinFixedPoint> getMinFixedPointFormulas() const override{
+    std::vector<std::reference_wrapper<const MinFixedPoint>> getMinFixedPointFormulas() const override{
         auto left = mLeftFormula->getMinFixedPointFormulas();
         auto right = mRightFormula->getMinFixedPointFormulas();
         std::copy(right.begin(), right.end(), std::back_inserter(left));
@@ -173,6 +250,23 @@ public:
         return left;
     }
 
+    std::list<std::reference_wrapper<const FixedPointVariable>>
+    getFixedPointVariables() const override {
+        auto left = mLeftFormula->getFixedPointVariables();
+        auto right = mRightFormula->getFixedPointVariables();
+        std::copy(right.begin(), right.end(), std::back_inserter(left));
+
+        return left;
+    }
+
+    std::list<std::reference_wrapper<const FixedPointVariable>>
+    getFreeFixedPointVariables() const override {
+        auto left = mLeftFormula->getFreeFixedPointVariables();
+        auto right = mRightFormula->getFreeFixedPointVariables();
+        std::copy(right.begin(), right.end(), std::back_inserter(left));
+
+        return left;
+    }
 
 
 private:
@@ -194,16 +288,28 @@ public:
         return mFormula;
     }
 
+
     const std::string &getMActionLabel() const {
         return mActionLabel;
     }
 
-    std::vector<MaxFixedPoint> getMaxFixedPointFormulas() const override{
+
+    std::vector<std::reference_wrapper<const MaxFixedPoint>> getMaxFixedPointFormulas() const override{
         return mFormula->getMaxFixedPointFormulas();
     }
 
-    std::vector<MinFixedPoint> getMinFixedPointFormulas() const override{
+    std::vector<std::reference_wrapper<const MinFixedPoint>> getMinFixedPointFormulas() const override{
         return mFormula->getMinFixedPointFormulas();
+    }
+
+    std::list<std::reference_wrapper<const FixedPointVariable>>
+    getFixedPointVariables() const override {
+        return mFormula->getFixedPointVariables();
+    }
+
+    std::list<std::reference_wrapper<const FixedPointVariable>>
+    getFreeFixedPointVariables() const override {
+        return mFormula->getFreeFixedPointVariables();
     }
 
 
@@ -226,16 +332,28 @@ public:
         return mFormula;
     }
 
+
     const std::string &getMActionLabel() const {
         return mActionLabel;
     }
 
-    std::vector<MaxFixedPoint> getMaxFixedPointFormulas() const override{
+
+    std::vector<std::reference_wrapper<const MaxFixedPoint>> getMaxFixedPointFormulas() const override{
         return mFormula->getMaxFixedPointFormulas();
     }
 
-    std::vector<MinFixedPoint> getMinFixedPointFormulas() const override{
+    std::vector<std::reference_wrapper<const MinFixedPoint>> getMinFixedPointFormulas() const override{
         return mFormula->getMinFixedPointFormulas();
+    }
+
+    std::list<std::reference_wrapper<const FixedPointVariable>>
+    getFixedPointVariables() const override {
+        return mFormula->getFixedPointVariables();
+    }
+
+    std::list<std::reference_wrapper<const FixedPointVariable>>
+    getFreeFixedPointVariables() const override {
+        return mFormula->getFreeFixedPointVariables();
     }
 
 
@@ -260,24 +378,44 @@ public:
         return mFormula;
     }
 
-    /*char getFixedPointVariable() const override{
-        return mFixedPointVariable.;
-    }*/
 
-    std::vector<MaxFixedPoint> getMaxFixedPointFormulas() const override{
+    std::vector<std::reference_wrapper<const MaxFixedPoint>> getMaxFixedPointFormulas() const override{
+
         auto maxFixedPoints = mFormula->getMaxFixedPointFormulas();
-        maxFixedPoints.push_back(*this);
+        maxFixedPoints.emplace_back(*this);
 
         return maxFixedPoints;
     }
 
-    std::vector<MinFixedPoint> getMinFixedPointFormulas() const override{
+    std::vector<std::reference_wrapper<const MinFixedPoint>> getMinFixedPointFormulas() const override{
         return mFormula->getMinFixedPointFormulas();
     }
 
+    std::list<std::reference_wrapper<const FixedPointVariable>>
+    getFixedPointVariables() const override {
+        return mFormula->getFixedPointVariables();
+    }
+
+    std::list<std::reference_wrapper<const FixedPointVariable>>
+    getFreeFixedPointVariables() const override {
+        auto variables = mFormula->getFreeFixedPointVariables();
+        for(auto it = variables.begin(); it != variables.end(); it++) {
+            if(*mFixedPointVariable == *it) {
+                variables.erase(it);
+            }
+        }
+        return variables;
+    }
+
+    const FixedPointVariable& getMFixedPointVariable() const {
+        return *mFixedPointVariable;
+    }
 
 private:
     std::shared_ptr<FixedPointVariable> mFixedPointVariable;
+
+
+private:
     std::shared_ptr<Formula> mFormula;
 };
 
@@ -298,17 +436,37 @@ public:
         return mFormula;
     }
 
-    std::vector<MaxFixedPoint> getMaxFixedPointFormulas() const override{
+    std::vector<std::reference_wrapper<const MaxFixedPoint>> getMaxFixedPointFormulas() const override{
 
         return mFormula->getMaxFixedPointFormulas();
 
     }
 
-    std::vector<MinFixedPoint> getMinFixedPointFormulas() const override{
+    std::vector<std::reference_wrapper<const MinFixedPoint>> getMinFixedPointFormulas() const override{
         auto minFixedPoints = mFormula->getMinFixedPointFormulas();
-        minFixedPoints.push_back(*this);
+        minFixedPoints.emplace_back(*this);
 
         return minFixedPoints;
+    }
+
+    std::list<std::reference_wrapper<const FixedPointVariable>>
+    getFixedPointVariables() const override {
+        return mFormula->getFixedPointVariables();
+    }
+
+    std::list<std::reference_wrapper<const FixedPointVariable>>
+    getFreeFixedPointVariables() const override {
+        auto variables = mFormula->getFreeFixedPointVariables();
+        for(auto it = variables.begin(); it != variables.end(); it++) {
+            if(*mFixedPointVariable == *it) {
+                variables.erase(it);
+            }
+        }
+        return variables;
+    }
+
+    const FixedPointVariable& getMFixedPointVariable() const {
+        return *mFixedPointVariable;
     }
 
 

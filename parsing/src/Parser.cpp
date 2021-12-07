@@ -6,6 +6,7 @@
 #include "Formula.h"
 #include <iostream>
 #include <sstream>
+#include <memory>
 
 namespace parser_space {
 

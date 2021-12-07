@@ -57,7 +57,7 @@ int AlternatingNestingDepthCalculator::computeAlternatingNestingDepth(const Form
             return alternationDepth;
         }
         default:
-            throw std::runtime_error("This should not be reachable. Switch statement not exhaustive...");
+            throw std::runtime_error("This should not be reachable. Switch statement should be exhaustive...");
     }
 
     return 0;
