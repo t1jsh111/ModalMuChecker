@@ -129,10 +129,6 @@ public:
     }
 
 
-    char getFixedPointVariable() const {
-        return mFixedPointVariable;
-    }
-
 
     std::vector<std::reference_wrapper<const MaxFixedPoint>> getMaxFixedPointFormulas() const override{
         return std::vector<std::reference_wrapper<const MaxFixedPoint>>();
