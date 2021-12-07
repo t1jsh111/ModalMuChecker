@@ -21,6 +21,7 @@
 class MaxFixedPoint;
 class MinFixedPoint;
 class FixedPointVariable;
+class FixedPoint;
 struct FixedPointVariableHashFunction;
 
 
@@ -75,12 +76,17 @@ public:
     }
 
     bool operator==(const FixedPointVariable& rhs) const {
-        return mFixedPointVariable == rhs.mFixedPointVariable;
+        return mFixedPointVariable == rhs.mFixedPointVariable && boundingFormula == rhs.boundingFormula;
+    }
+
+    void setBoundingFormula(std::shared_ptr<FixedPoint> formula) {
+        boundingFormula = formula;
     }
 
 
 private:
     const char mFixedPointVariable;
+    std::shared_ptr<FixedPoint> boundingFormula;
 };
 
 
@@ -362,10 +368,19 @@ private:
     std::shared_ptr<Formula> mFormula;
 };
 
-class MaxFixedPoint : public Formula {
+class FixedPoint {
+public:
+    enum FixedPointFormulaType {MaxFixedPointFormula, MinFixedPointFormula};
+    explicit FixedPoint(FixedPointFormulaType formulaType) : mFormulatype(formulaType) {}
+private:
+    const FixedPointFormulaType mFormulatype;
+};
+
+class MaxFixedPoint : public Formula, public FixedPoint {
 public:
     MaxFixedPoint(std::shared_ptr<FixedPointVariable> fixedPointVariable, std::shared_ptr<Formula> formula)
-        : Formula(MaxFixedPointType), mFixedPointVariable(std::move(fixedPointVariable)), mFormula(std::move(formula)) {}
+        : Formula(MaxFixedPointType), FixedPoint(FixedPointFormulaType::MaxFixedPointFormula),
+        mFixedPointVariable(std::move(fixedPointVariable)), mFormula(std::move(formula)) {}
 
     void printFormula() const override {
         std::cout << "nu" << " ";
@@ -419,10 +434,11 @@ private:
     std::shared_ptr<Formula> mFormula;
 };
 
-class MinFixedPoint : public Formula {
+class MinFixedPoint : public Formula, public FixedPoint {
 public:
     MinFixedPoint(std::shared_ptr<FixedPointVariable> fixedPointVariable, std::shared_ptr<Formula> formula)
-    : Formula(MinFixedPointType), mFixedPointVariable(std::move(fixedPointVariable)), mFormula(std::move(formula)) {}
+    : Formula(MinFixedPointType), FixedPoint(FixedPointFormulaType::MinFixedPointFormula),
+    mFixedPointVariable(std::move(fixedPointVariable)), mFormula(std::move(formula)) {}
 
 
     void printFormula() const override {

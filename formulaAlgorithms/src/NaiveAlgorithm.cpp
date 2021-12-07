@@ -11,11 +11,7 @@ std::set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts,
     const Formula::FormulaType& formulaType = formula.getFormulaType();
     switch (formulaType) {
         case Formula::TrueType: { // Return S
-            std::set<int> S;
-            for (int i = 0; i < lts.nrOfStates; i++) {
-                S.emplace(i);
-            }
-            return S;
+            return lts.getStates();
         }
         case Formula::FalseType: { // Return Empty set
             std::set<int> empty;
@@ -60,7 +56,7 @@ std::set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts,
             std::string label = '"' + box.getMActionLabel() + '"';
             std::set<int> boxed;
             for (int i = 0; i < lts.nrOfStates; i++) {
-                const std::set<std::shared_ptr<Lts::Transition>> transitions = lts.getTransitionsOfStartState(i);
+                const std::set<std::shared_ptr<Lts::Transition>> transitions = lts.getTransitionsOfSourceState(i);
                 bool emplace = true;
                 for (std::shared_ptr<Lts::Transition> t : transitions) {
                     if (t->label.compare(label) == 0 && eval.find(t->endState) == eval.end()) { // s -a-> t =/=> t in eval(g)
@@ -80,7 +76,7 @@ std::set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts,
             std::string label = '"' + diamond.getMActionLabel() + '"';
             std::set<int> diamonded;
             for (int i = 0; i < lts.nrOfStates; i++) {
-                const std::set<std::shared_ptr<Lts::Transition>> transitions = lts.getTransitionsOfStartState(i);
+                const std::set<std::shared_ptr<Lts::Transition>> transitions = lts.getTransitionsOfSourceState(i);
                 for (std::shared_ptr<Lts::Transition> t : transitions) {
                     if (t->label.compare(label) == 0 && eval.find(t->endState) != eval.end()) { // s -a-> t & t in eval(g)
                         diamonded.emplace(i);

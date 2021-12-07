@@ -106,6 +106,7 @@ namespace parser_space {
 
     std::shared_ptr<Formula> Parser::parseFormula(const std::string& formula) {
         Tokenizer tokenizer;
+        std::map<char, std::shared_ptr<FixedPointVariable>> environment;
         auto tokenized = tokenizer.parse(formula);
 
         return parseFormula(tokenized);
@@ -113,10 +114,11 @@ namespace parser_space {
 
     std::shared_ptr<Formula> Parser::parseFormula(std::vector<Token> &tokens) {
         size_t position = 0;
-        return parseFormula(tokens, position);
+        std::map<char, std::shared_ptr<FixedPointVariable>> environment;
+        return parseFormula(tokens, position, environment);
     }
 
-    std::shared_ptr<Formula> Parser::parseFormula(std::vector<Token> &tokens, size_t &startPosition) {
+    std::shared_ptr<Formula> Parser::parseFormula(std::vector<Token> &tokens, size_t &startPosition, std::map<char, std::shared_ptr<FixedPointVariable>>& environment) {
         for (auto &i = startPosition; i < tokens.size(); i++) {
             const auto &token = tokens[i];
 
@@ -128,10 +130,13 @@ namespace parser_space {
                     return std::make_shared<False>();
                     break;
                 case RECURSION_VARIABLE:
-                    return std::make_shared<FixedPointVariable>(token.mText[0]);
+                    if(!environment.at(token.mText[0])) {
+                        throw std::runtime_error("FOUND VARIABLE THAT IS NOT BOUND BY A FIXED POINT");
+                    }
+                    return environment.at(token.mText[0]);
                     break;
                 case LEFT_ROUND_BRACKET: {
-                    auto leftFormula = parseFormula(tokens, ++i);
+                    auto leftFormula = parseFormula(tokens, ++i, environment);
                     i++;
                     if (not(tokens[i].mType == AND_OPERATOR || tokens[i].mType == OR_OPERATOR)) {
                         throw std::runtime_error("No binary operator in logical formula");
@@ -139,10 +144,10 @@ namespace parser_space {
                     // By if statement guaranteed tokens[i].mType is AND_OPERATOR or OR_OPERATOR
                     std::shared_ptr<Formula> logicalFormula;
                     if (tokens[i].mType == AND_OPERATOR) {
-                        auto rightFormula = parseFormula(tokens, ++i);
+                        auto rightFormula = parseFormula(tokens, ++i, environment);
                         logicalFormula = std::make_shared<Conjunction>(leftFormula, rightFormula);
                     } else {
-                        auto rightFormula = parseFormula(tokens, ++i);
+                        auto rightFormula = parseFormula(tokens, ++i, environment);
                         logicalFormula = std::make_shared<Disjunction>(leftFormula, rightFormula);
                     }
                     i++;
@@ -157,10 +162,16 @@ namespace parser_space {
                     if (tokens[i].mType != RECURSION_VARIABLE) {
                         throw std::runtime_error("mu formula without being followed by recursion variable");
                     }
+                    char fixedPointChar = tokens[i].mText[0];
                     auto fixedPointVariable = std::shared_ptr<FixedPointVariable>(
-                            new FixedPointVariable(tokens[i].mText[0]));
-                    auto formula = parseFormula(tokens, ++i);
-                    return std::make_shared<MinFixedPoint>(fixedPointVariable, formula);
+                            new FixedPointVariable(fixedPointChar));
+
+                    environment[fixedPointChar] = fixedPointVariable;
+
+                    auto formula = parseFormula(tokens, ++i, environment);
+                    auto minFixedPointFormula = std::make_shared<MinFixedPoint>(fixedPointVariable, formula);
+                    fixedPointVariable->setBoundingFormula(minFixedPointFormula);
+                    return minFixedPointFormula;
                     break;
                 }
                 case NU_LITERAL: {
@@ -168,9 +179,16 @@ namespace parser_space {
                     if (tokens[i].mType != RECURSION_VARIABLE) {
                         throw std::runtime_error("nu formula without being followed by recursion variable");
                     }
+                    char fixedPointChar = tokens[i].mText[0];
+
                     auto fixedPointVariable = std::shared_ptr<FixedPointVariable>(
                             new FixedPointVariable(tokens[i].mText[0]));
-                    auto formula = parseFormula(tokens, ++i);
+
+                    environment[fixedPointChar] = fixedPointVariable;
+
+                    auto formula = parseFormula(tokens, ++i, environment);
+                    auto maxFixedPointFormula = std::make_shared<MaxFixedPoint>(fixedPointVariable, formula);
+                    fixedPointVariable->setBoundingFormula(maxFixedPointFormula);
                     return std::make_shared<MaxFixedPoint>(fixedPointVariable, formula);
                     break;
                 }
@@ -184,7 +202,7 @@ namespace parser_space {
                     if (tokens[i].mType != RIGHT_DIAMOND_BRACKET) {
                         throw std::runtime_error("Diamond is not closed by right brackets");
                     }
-                    auto formula = parseFormula(tokens, ++i);
+                    auto formula = parseFormula(tokens, ++i, environment);
                     return std::make_shared<Diamond>(actionLabel, formula);
                     break;
                 }
@@ -198,7 +216,7 @@ namespace parser_space {
                     if (tokens[i].mType != RIGHT_BOX_BRACKET) {
                         throw std::runtime_error("box is not closed by right bracket");
                     }
-                    auto formula = parseFormula(tokens, ++i);
+                    auto formula = parseFormula(tokens, ++i, environment);
                     return std::make_shared<Box>(actionLabel, formula);
                     break;
                 }

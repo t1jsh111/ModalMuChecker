@@ -21,7 +21,7 @@ namespace parser_space {
     private:
         static std::string getElementOfTuple(std::string tuple, int index);
         static std::shared_ptr<Formula> parseFormula(std::vector<Token>& tokens);
-        static std::shared_ptr<Formula> parseFormula(std::vector<Token>& tokens, size_t& startPosition);
+        static std::shared_ptr<Formula> parseFormula(std::vector<Token>& tokens, size_t& startPosition, std::map<char, std::shared_ptr<FixedPointVariable>>& environment);
     };
 }
 

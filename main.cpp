@@ -82,5 +82,14 @@ int main() {
         std::cout << "vertex: " << i << std::endl;
     }
 
+    auto testFormula = parser_space::Parser::parseFormula("mu X. mu X. X");
+    testFormula->printFormula();
+    auto variables = testFormula->getFixedPointVariables();
+    auto firstVariable = variables.back().get();
+
+    auto theFormula = testFormula->getMinFixedPointFormulas().at(0);
+    bool theSame = firstVariable == theFormula.get().getMFixedPointVariable();
+    std::cout << "they are " << ( theSame ? "the same" : "not the same");
+
     return 0;
 }
