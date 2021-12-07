@@ -9,6 +9,9 @@
 #include <vector>
 #include <utility>
 #include <iostream>
+#include <set>
+#include <unordered_set>
+#include <memory>
 #include <list>
 
 /*
@@ -120,6 +123,13 @@ public:
     void printFormula() const override {
         std::cout << "False";
     }
+
+
+    char getFixedPointVariable() const {
+        return mFixedPointVariable;
+    }
+
+
     std::vector<std::reference_wrapper<const MaxFixedPoint>> getMaxFixedPointFormulas() const override{
         return std::vector<std::reference_wrapper<const MaxFixedPoint>>();
     }
@@ -278,6 +288,12 @@ public:
         return mFormula;
     }
 
+
+    const std::string &getMActionLabel() const {
+        return mActionLabel;
+    }
+
+
     std::vector<std::reference_wrapper<const MaxFixedPoint>> getMaxFixedPointFormulas() const override{
         return mFormula->getMaxFixedPointFormulas();
     }
@@ -315,6 +331,12 @@ public:
     const std::shared_ptr<Formula> &getMFormula() const {
         return mFormula;
     }
+
+
+    const std::string &getMActionLabel() const {
+        return mActionLabel;
+    }
+
 
     std::vector<std::reference_wrapper<const MaxFixedPoint>> getMaxFixedPointFormulas() const override{
         return mFormula->getMaxFixedPointFormulas();
@@ -357,8 +379,8 @@ public:
     }
 
 
-
     std::vector<std::reference_wrapper<const MaxFixedPoint>> getMaxFixedPointFormulas() const override{
+
         auto maxFixedPoints = mFormula->getMaxFixedPointFormulas();
         maxFixedPoints.emplace_back(*this);
 
