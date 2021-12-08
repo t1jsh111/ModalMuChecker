@@ -74,9 +74,9 @@ int main() {
     std::cout << "Alternating depth: " << AlternatingNestingDepthCalculator::computeAlternatingNestingDepth(*slideExample2) << std::endl;
     std::cout << "depending alternating depth: " << DependentAlternationDepthCalculator::computeDependentAlternatingNestingDepth(*slideExample2) << std::endl;
 
-    form = parser_space::Parser::parseFormulaFile("resources/testcases/modal_operators/form5.mcf");
-    Lts test(parser_space::Parser::parseLts("resources/testcases/modal_operators/test.aut"));
-    std::pair<char, std::set<int>> * A;
+    form = parser_space::Parser::parseFormulaFile("resources/testcases/boolean/form9.mcf");
+    Lts test(parser_space::Parser::parseLts("resources/testcases/boolean/test.aut"));
+    std::map<char, std::set<int>> A;
     std::set<int> result = NaiveAlgorithm::evaluate(*form, test, A);
     for (int i : result) {
         std::cout << "vertex: " << i << std::endl;

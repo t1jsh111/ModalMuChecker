@@ -7,7 +7,7 @@
 #include "Lts.h"
 #include <set>
 
-std::set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts, std::pair<char, std::set<int>> * A) {
+std::set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts, std::map<char, std::set<int>> A) {
     const Formula::FormulaType& formulaType = formula.getFormulaType();
     switch (formulaType) {
         case Formula::TrueType: { // Return S
@@ -19,11 +19,14 @@ std::set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts,
         }
         case Formula::FixedPointVariableType: { // Return A[i]
             char var = dynamic_cast<const FixedPointVariable &>(formula).getFixedPointVariable();
-            for (int i = 0; i < sizeof A; i++) {
+            if (A.count(var) != 0) {
+                return A.at(var);
+            }
+            /*for (int i = 0; i < sizeof A; i++) {
                 if (A[i].first == var) {
                     return A[i].second;
                 }
-            }
+            }*/
             break;
         }
         case Formula::ConjunctionType: { // Return eval(g1) n eval(g2)
@@ -38,15 +41,15 @@ std::set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts,
             }
             return conjunct;
         }
-        case Formula::DisjunctionType: {
+        case Formula::DisjunctionType: { // Return eval(g1) u eval(g2)
             const auto& disjunction = dynamic_cast<const Disjunction&>(formula);
             std::set<int> evalLeft = evaluate(*disjunction.getMLeftFormula(), lts, A);
             std::set<int> evalRight = evaluate(*disjunction.getMRightFormula(), lts, A);
             std::set<int> disjunct = evalLeft;
             for (int i : evalRight) {
-                if (disjunct.find(i) == disjunct.end()) {
+                //if (disjunct.find(i) == disjunct.end()) {
                     disjunct.emplace(i);
-                }
+                //}
             }
             return disjunct;
         }
