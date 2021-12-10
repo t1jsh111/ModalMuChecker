@@ -75,13 +75,24 @@ public:
         return {*this};
     }
 
+    void setBoundingFormula(std::shared_ptr<FixedPoint> formula) {
+        boundingFormula = formula;
+    }
+
     bool operator==(const FixedPointVariable& rhs) const {
         return mFixedPointVariable == rhs.mFixedPointVariable && boundingFormula == rhs.boundingFormula;
     }
 
-    void setBoundingFormula(std::shared_ptr<FixedPoint> formula) {
-        boundingFormula = formula;
-    }
+    struct HashFunction {
+        template <class T1, class T2>
+        std::size_t operator() (const FixedPointVariable<T1, T2> &node) const
+        {
+            std::size_t h1 = std::hash<T1>()(node.x);
+            std::size_t h2 = std::hash<T2>()(node.y);
+
+            return h1 ^ h2;
+        }
+    };
 
 
 private:
@@ -428,9 +439,6 @@ public:
 
 private:
     std::shared_ptr<FixedPointVariable> mFixedPointVariable;
-
-
-private:
     std::shared_ptr<Formula> mFormula;
 };
 

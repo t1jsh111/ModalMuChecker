@@ -7,7 +7,7 @@
 #include "Lts.h"
 #include <set>
 
-std::set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts, std::map<char, std::set<int>> A) {
+std::set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts, std::unordered_map<FixedPointVariable, std::set<int>> A) {
     const Formula::FormulaType& formulaType = formula.getFormulaType();
     switch (formulaType) {
         case Formula::TrueType: { // Return S
@@ -18,15 +18,10 @@ std::set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts,
             return empty;
         }
         case Formula::FixedPointVariableType: { // Return A[i]
-            char var = dynamic_cast<const FixedPointVariable &>(formula).getFixedPointVariable();
-            if (A.count(var) != 0) {
-                return A.at(var);
+            const auto& fixedPointVariable = dynamic_cast<const FixedPointVariable &>(formula);
+            if (A.count(fixedPointVariable) != 0) {
+                return A.at(fixedPointVariable);
             }
-            /*for (int i = 0; i < sizeof A; i++) {
-                if (A[i].first == var) {
-                    return A[i].second;
-                }
-            }*/
             break;
         }
         case Formula::ConjunctionType: { // Return eval(g1) n eval(g2)
@@ -89,6 +84,22 @@ std::set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts,
             }
             return diamonded;
         }
+        case Formula::MinFixedPointType: {
+            const auto &fixedPoint = dynamic_cast<const MinFixedPoint &>(formula);
+            const auto& boundedVariable = fixedPoint.getMFixedPointVariable();
+
+            A[boundedVariable] = std::set<int>();
+
+            std::set<int> X = lts.getStates();
+            while (X != A[boundedVariable]) {
+                X = A[boundedVariable]; // X' := A[i]
+                A[boundedVariable] = evaluate(*fixedPoint.getMFormula(), lts, A); // A[i] := eval(g)
+            }
+
+            return A[boundedVariable];
+        }
+
+
         /*case Formula::MinFixedPointType: {
             const auto &fixedPoint = dynamic_cast<const MinFixedPoint &>(formula);
             int alternationDepth = std::max(1, computeAlternatingNestingDepth(*fixedPoint.getMFormula()));
@@ -100,26 +111,23 @@ std::set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts,
             return alternationDepth;
             break;
         }*/
-        /*case Formula::MaxFixedPointType: {
+        case Formula::MaxFixedPointType: {
             const auto &fixedPoint = dynamic_cast<const MaxFixedPoint &>(formula);
-            char var = fixedPoint.getFixedPointVariable();
-            int i = sizeof A;
+            const auto& boundedVariable = fixedPoint.getMFixedPointVariable();
 
             // A[i] := S
             std::set<int> S;
-            for (int j = 0; j < lts.nrOfStates; j++) {
-                S.emplace(j);
-            }
-            A[i] = std::pair<char, std::set<int>> (var, S);
+            const auto& allStates = lts.getStates();
+            A[boundedVariable] = allStates;
 
             std::set<int> X;
-            while (X != A[i].second) {
-                X = A[i].second; // X' := A[i]
-                A[i].second = evaluate(*fixedPoint.getMFormula(), lts, A); // A[i] := eval(g)
+            while (X != A[boundedVariable]) {
+                X = A[boundedVariable]; // X' := A[i]
+                A[boundedVariable] = evaluate(*fixedPoint.getMFormula(), lts, A); // A[i] := eval(g)
             }
 
-            return A[i].second;
-        }*/
+            return A[boundedVariable];
+        }
         default:
             throw std::runtime_error("This should not be reachable. Switch statement not exhaustive...");
     }
