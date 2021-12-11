@@ -17,22 +17,22 @@ void Lts::addTransition(int startState, std::string label, int endState) {
     std::shared_ptr<Transition> transition(new Transition{startState, label, endState});
     // If map does not contain startState as key, add a set for it
     if(startStateToTransitions.count(startState) <= 0) {
-        startStateToTransitions.insert(std::pair<int,std::set<std::shared_ptr<Transition>>>(startState,{}));
+        startStateToTransitions.insert(std::pair<int,std::unordered_set<std::shared_ptr<Transition>>>(startState,{}));
     }
     // If map does not contain endState as key, add a set for it
     if(endStateToTransitions.count(endState) <= 0) {
-        endStateToTransitions.insert(std::pair<int,std::set<std::shared_ptr<Transition>>>(endState,{}));
+        endStateToTransitions.insert(std::pair<int,std::unordered_set<std::shared_ptr<Transition>>>(endState,{}));
     }
 
     startStateToTransitions.at(startState).insert(transition);
     endStateToTransitions.at(endState).insert(transition);
 }
 
-const std::set<std::shared_ptr<Lts::Transition>> & Lts::getTransitionsOfSourceState(int sourceState) const {
+const std::unordered_set<std::shared_ptr<Lts::Transition>> & Lts::getTransitionsOfSourceState(int sourceState) const {
     return startStateToTransitions.at(sourceState);
 }
 
-const std::set<std::shared_ptr<Lts::Transition>> & Lts::getTransitionsOfTargetState(int targetState) const {
+const std::unordered_set<std::shared_ptr<Lts::Transition>> & Lts::getTransitionsOfTargetState(int targetState) const {
     return endStateToTransitions.at(targetState);
 }
 
@@ -62,11 +62,11 @@ void Lts::printTransitionsOfEndState(int endState) const {
     }
 }
 
-const std::set<int>& Lts::getStates() const {
+const std::unordered_set<int> & Lts::getStates() const {
     return states;
 }
 
 
 void Lts::Transition::printTransition() const {
-    std::cout << "(" << this->startingState << "," << this->endState << ")";
+    std::cout << "(" << this->startingState << ", " << this->label << ", "<< this->endState << ")";
 }

@@ -9,6 +9,7 @@
 #include <memory>
 #include <map>
 #include <set>
+#include <unordered_set>
 
 
 class Lts {
@@ -19,8 +20,8 @@ public:
     Lts(int initialState, int nrOfTransitions, int nrOfStates);
 
     void addTransition(int startState, std::string label, int endState);
-    const std::set<std::shared_ptr<Transition>> & getTransitionsOfSourceState(int sourceState) const;
-    const std::set<std::shared_ptr<Transition>> & getTransitionsOfTargetState(int targetState) const;
+    const std::unordered_set<std::shared_ptr<Transition>> & getTransitionsOfSourceState(int sourceState) const;
+    const std::unordered_set<std::shared_ptr<Transition>> & getTransitionsOfTargetState(int targetState) const;
 
     void printTransitionsOfStartState(int startState) const;
     void printTransitionsOfEndState(int endState) const;
@@ -31,7 +32,7 @@ public:
 
     int getNrOfStates() const;
 
-    const std::set<int> &getStates() const;
+    const std::unordered_set<int> & getStates() const;
 
     struct Transition {
         int startingState;
@@ -46,11 +47,11 @@ public:
     int nrOfTransitions;
     int nrOfStates;
 
-    std::set<int> states;
+    std::unordered_set<int> states;
 
 
-    std::map<int, std::set<std::shared_ptr<Transition>>> startStateToTransitions;
-    std::map<int, std::set<std::shared_ptr<Transition>>> endStateToTransitions;
+    std::map<int, std::unordered_set<std::shared_ptr<Transition>>> startStateToTransitions;
+    std::map<int, std::unordered_set<std::shared_ptr<Transition>>> endStateToTransitions;
 
 };
 

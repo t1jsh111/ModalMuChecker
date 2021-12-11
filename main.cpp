@@ -13,15 +13,18 @@ int main() {
 
     Lts lts(parser_space::Parser::parseLts("resources/testcases/boolean/test.aut"));
     std::cout << "nr of states " << lts.getNrOfStates() << std::endl;
-    lts.printTransitionsOfStartState(0);
+    lts.printTransitionsOfStartState(3);
     lts.printTransitionsOfEndState(2);
 
     std::cout << std::endl;
 
-    auto form = parser_space::Parser::parseFormulaFile("resources/testcases/fixpoints_only/form5.mcf");
-    form->printFormula();
-    std::cout << std::endl;
-    auto minFix = form->getMaxFixedPointFormulas();
+    auto form = parser_space::Parser::parseFormulaFile("resources/testcases/modal_operators/form5.mcf");
+
+    const auto& solution = NaiveAlgorithm::evaluate(*form, lts);
+
+    for(const auto& el : solution) {
+        std::cout << "state " << el << std::endl;
+    }
 
 
 //    std::cout << "------------" << std::endl;
@@ -54,42 +57,43 @@ int main() {
 //
 //        std::cout << "address form" << &form.get() << std::endl;
 //    }
-
-
-
-    std::cout << "Equality check: first " << &minFix[0] << "second" << &form;
-
-    auto slideExample1 = parser_space::Parser::parseFormula("(mu A. nu B. (A || B) && mu C. mu D. (C && mu E. (true || E)))");
-    slideExample1->printFormula();
-    std::cout << std::endl;
-    std::cout << "Nesting depth: " << NestingDepthCalculator::computeNestingDepth(*slideExample1) << std::endl;
-    std::cout << "Alternating depth: " << AlternatingNestingDepthCalculator::computeAlternatingNestingDepth(*slideExample1) << std::endl;
-    std::cout << "depending alternating depth: " << DependentAlternationDepthCalculator::computeDependentAlternatingNestingDepth(*slideExample1) << std::endl;
-
-
-    auto slideExample2 = parser_space::Parser::parseFormula("(mu A. nu B. (A || B) && mu C. nu D. (C && mu E. (true || E)))");
-    slideExample2->printFormula();
-    std::cout << std::endl;
-    std::cout << "Nesting depth: " << NestingDepthCalculator::computeNestingDepth(*slideExample2) << std::endl;
-    std::cout << "Alternating depth: " << AlternatingNestingDepthCalculator::computeAlternatingNestingDepth(*slideExample2) << std::endl;
-    std::cout << "depending alternating depth: " << DependentAlternationDepthCalculator::computeDependentAlternatingNestingDepth(*slideExample2) << std::endl;
-
-    form = parser_space::Parser::parseFormulaFile("resources/testcases/boolean/form9.mcf");
-    Lts test(parser_space::Parser::parseLts("resources/testcases/boolean/test.aut"));
-    std::map<char, std::set<int>> A;
-    std::set<int> result = NaiveAlgorithm::evaluate(*form, test, A);
-    for (int i : result) {
-        std::cout << "vertex: " << i << std::endl;
-    }
-
-    auto testFormula = parser_space::Parser::parseFormula("mu X. mu X. X");
-    testFormula->printFormula();
-    auto variables = testFormula->getFixedPointVariables();
-    auto firstVariable = variables.back().get();
-
-    auto theFormula = testFormula->getMinFixedPointFormulas().at(0);
-    bool theSame = firstVariable == theFormula.get().getMFixedPointVariable();
-    std::cout << "they are " << ( theSame ? "the same" : "not the same");
+//
+//
+//
+//    std::cout << "Equality check: first " << &minFix[0] << "second" << &form;
+//
+//    auto slideExample1 = parser_space::Parser::parseFormula("(mu A. nu B. (A || B) && mu C. mu D. (C && mu E. (true || E)))");
+//    slideExample1->printFormula();
+//    std::cout << std::endl;
+//    std::cout << "Nesting depth: " << NestingDepthCalculator::computeNestingDepth(*slideExample1) << std::endl;
+//    std::cout << "Alternating depth: " << AlternatingNestingDepthCalculator::computeAlternatingNestingDepth(*slideExample1) << std::endl;
+//    std::cout << "depending alternating depth: " << DependentAlternationDepthCalculator::computeDependentAlternatingNestingDepth(*slideExample1) << std::endl;
+//
+//
+//    auto slideExample2 = parser_space::Parser::parseFormula("(mu A. nu B. (A || B) && mu C. nu D. (C && mu E. (true || E)))");
+//    slideExample2->printFormula();
+//    std::cout << std::endl;
+//    std::cout << "Nesting depth: " << NestingDepthCalculator::computeNestingDepth(*slideExample2) << std::endl;
+//    std::cout << "Alternating depth: " << AlternatingNestingDepthCalculator::computeAlternatingNestingDepth(*slideExample2) << std::endl;
+//    std::cout << "depending alternating depth: " << DependentAlternationDepthCalculator::computeDependentAlternatingNestingDepth(*slideExample2) << std::endl;
+//
+//    form = parser_space::Parser::parseFormulaFile("resources/testcases/boolean/form9.mcf");
+//    Lts test(parser_space::Parser::parseLts("resources/testcases/boolean/test.aut"));
+//
+//    std::unordered_map<FixedPointVariable, std::unordered_set<int>, FixedPointVariable::HashFunction> A;
+//    std::unordered_set<int> result = NaiveAlgorithm::evaluate(*form, test, A);
+//    for (int i : result) {
+//        std::cout << "vertex: " << i << std::endl;
+//    }
+//
+//    auto testFormula = parser_space::Parser::parseFormula("mu X. mu X. X");
+//    testFormula->printFormula();
+//    auto variables = testFormula->getFixedPointVariables();
+//    auto firstVariable = variables.back().get();
+//
+//    auto theFormula = testFormula->getMinFixedPointFormulas().at(0);
+//    bool theSame = firstVariable == theFormula.get().getMFixedPointVariable();
+//    std::cout << "they are " << ( theSame ? "the same" : "not the same");
 
     return 0;
 }

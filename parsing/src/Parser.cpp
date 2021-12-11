@@ -38,7 +38,9 @@ namespace parser_space {
         while (autFile >> currentWord) {
 
             int startState = std::stoi(getElementOfTuple(currentWord, 0));
-            std::string label = getElementOfTuple(currentWord, 1);
+
+            const auto& labelWithQuotes = getElementOfTuple(currentWord, 1);
+            std::string label = getElementOfTuple(currentWord, 1).substr(1, labelWithQuotes.length()-2);
             int endState = std::stoi(getElementOfTuple(currentWord, 2));
 
             lts.addTransition(startState, label, endState);

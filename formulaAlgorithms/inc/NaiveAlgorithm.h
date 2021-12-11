@@ -8,12 +8,18 @@
 #include <set>
 #include <unordered_map>
 #include "Lts.h"
+#include "Formula.h"
 
-class Formula;
 
 class NaiveAlgorithm {
 public:
-    static std::set<int> evaluate(const Formula & formula, const Lts & lts, std::unordered_map<FixedPointVariable, std::set<int>> A);
+    typedef std::unordered_map<FixedPointVariable, std::unordered_set<int>, FixedPointVariable::HashFunction> Mapping;
+
+    static std::unordered_set<int> evaluate(const Formula & formula, const Lts & lts);
+private:
+    static std::unordered_set<int> evaluate(const Formula & formula, const Lts & lts, Mapping& A);
+
+
 };
 
 #endif //MODALMUCHECKER_NAIVEALGORITHM_H

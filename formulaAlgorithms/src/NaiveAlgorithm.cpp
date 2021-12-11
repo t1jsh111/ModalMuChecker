@@ -7,77 +7,88 @@
 #include "Lts.h"
 #include <set>
 
-std::set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts, std::unordered_map<FixedPointVariable, std::set<int>> A) {
+std::unordered_set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts, Mapping& A) {
     const Formula::FormulaType& formulaType = formula.getFormulaType();
     switch (formulaType) {
         case Formula::TrueType: { // Return S
             return lts.getStates();
         }
         case Formula::FalseType: { // Return Empty set
-            std::set<int> empty;
+            std::unordered_set<int> empty;
             return empty;
         }
         case Formula::FixedPointVariableType: { // Return A[i]
             const auto& fixedPointVariable = dynamic_cast<const FixedPointVariable &>(formula);
-            if (A.count(fixedPointVariable) != 0) {
+
+            bool variableIsKeyInA = (A.count(fixedPointVariable) != 0);
+            if (variableIsKeyInA) {
                 return A.at(fixedPointVariable);
+            } else {
+                throw std::runtime_error("No set has been assigned for " + std::string(1,fixedPointVariable.getFixedPointVariable()));
             }
             break;
         }
         case Formula::ConjunctionType: { // Return eval(g1) n eval(g2)
             const auto& conjunction = dynamic_cast<const Conjunction&>(formula);
-            std::set<int> evalLeft = evaluate(*conjunction.getMLeftFormula(), lts, A);
-            std::set<int> evalRight = evaluate(*conjunction.getMRightFormula(), lts, A);
-            std::set<int> conjunct;
+            std::unordered_set<int> evalLeft = evaluate(*conjunction.getMLeftFormula(), lts, A);
+            std::unordered_set<int> evalRight = evaluate(*conjunction.getMRightFormula(), lts, A);
+            std::unordered_set<int> intersection;
             for (int i : evalLeft) {
-                if (evalRight.find(i) != evalRight.end()) {
-                    conjunct.emplace(i);
+                bool iExistsInRight = (evalRight.find(i) != evalRight.end());
+                if (iExistsInRight) {
+                    intersection.emplace(i);
                 }
             }
-            return conjunct;
+            return intersection;
         }
         case Formula::DisjunctionType: { // Return eval(g1) u eval(g2)
             const auto& disjunction = dynamic_cast<const Disjunction&>(formula);
-            std::set<int> evalLeft = evaluate(*disjunction.getMLeftFormula(), lts, A);
-            std::set<int> evalRight = evaluate(*disjunction.getMRightFormula(), lts, A);
-            std::set<int> disjunct = evalLeft;
-            for (int i : evalRight) {
-                //if (disjunct.find(i) == disjunct.end()) {
-                    disjunct.emplace(i);
-                //}
+            std::unordered_set<int> evalLeft = evaluate(*disjunction.getMLeftFormula(), lts, A);
+            std::unordered_set<int> evalRight = evaluate(*disjunction.getMRightFormula(), lts, A);
+            std::unordered_set<int> setUnion = evalLeft;
+            for (int i : evalRight) { // since setUnion we can simply add all elements. Set property will ensure no duplicates are there.
+                setUnion.emplace(i);
             }
-            return disjunct;
+            return setUnion;
         }
         case Formula::BoxType: { // {s in S | All t in S: s -a-> t ==> t in eval(g)}
             const auto &box = dynamic_cast<const Box &>(formula);
-            std::set<int> eval = evaluate(*box.getMFormula(), lts, A);
-            std::string label = '"' + box.getMActionLabel() + '"';
-            std::set<int> boxed;
-            for (int i = 0; i < lts.nrOfStates; i++) {
-                const std::set<std::shared_ptr<Lts::Transition>> transitions = lts.getTransitionsOfSourceState(i);
+            std::unordered_set<int> eval = evaluate(*box.getMFormula(), lts, A);
+            std::string label = box.getMActionLabel();
+            std::unordered_set<int> boxed;
+            for (const auto& state : lts.getStates()) {
+                const std::unordered_set<std::shared_ptr<Lts::Transition>>& transitions = lts.getTransitionsOfSourceState(state);
                 bool emplace = true;
-                for (std::shared_ptr<Lts::Transition> t : transitions) {
-                    if (t->label.compare(label) == 0 && eval.find(t->endState) == eval.end()) { // s -a-> t =/=> t in eval(g)
+                for (const auto& transition : transitions) {
+                    bool transitionWithLabelToStateNotInEval =
+                            (transition->label == label && eval.find(transition->endState) == eval.end());
+
+                    if (transitionWithLabelToStateNotInEval) { // s -a-> t =/=> t in eval(g)
+                        // hence universal quantifier is violated
                         emplace = false;
                         break;
                     }
                 }
                 if (emplace) { // Only add s if All t in S: s -a-> t ==> t in eval(g)
-                    boxed.emplace(i);
+                    boxed.emplace(state);
                 }
             }
             return boxed;
         }
         case Formula::DiamondType: {
             const auto &diamond = dynamic_cast<const Diamond &>(formula);
-            std::set<int> eval = evaluate(*diamond.getMFormula(), lts, A);
-            std::string label = '"' + diamond.getMActionLabel() + '"';
-            std::set<int> diamonded;
-            for (int i = 0; i < lts.nrOfStates; i++) {
-                const std::set<std::shared_ptr<Lts::Transition>> transitions = lts.getTransitionsOfSourceState(i);
-                for (std::shared_ptr<Lts::Transition> t : transitions) {
-                    if (t->label.compare(label) == 0 && eval.find(t->endState) != eval.end()) { // s -a-> t & t in eval(g)
-                        diamonded.emplace(i);
+            std::unordered_set<int> eval = evaluate(*diamond.getMFormula(), lts, A);
+            std::string label = diamond.getMActionLabel();
+            std::unordered_set<int> diamonded;
+            for (const auto& state : lts.getStates()) {
+                const std::unordered_set<std::shared_ptr<Lts::Transition>>& transitions = lts.getTransitionsOfSourceState(state);
+
+                for (const auto& transition : transitions) {
+                    bool transitionWithLabelToStateInEval = transition->label == label && eval.find(transition->endState) != eval.end();
+
+                    if (transitionWithLabelToStateInEval) { // s -a-> t & t in eval(g)
+                        // Hence existential quantifier holds
+                        diamonded.emplace(state);
                         break;
                     }
                 }
@@ -88,12 +99,12 @@ std::set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts,
             const auto &fixedPoint = dynamic_cast<const MinFixedPoint &>(formula);
             const auto& boundedVariable = fixedPoint.getMFixedPointVariable();
 
-            A[boundedVariable] = std::set<int>();
+            A[boundedVariable] = std::unordered_set<int>();
 
-            std::set<int> X = lts.getStates();
+            std::unordered_set<int> X = evaluate(*fixedPoint.getMFormula(), lts, A);
             while (X != A[boundedVariable]) {
-                X = A[boundedVariable]; // X' := A[i]
-                A[boundedVariable] = evaluate(*fixedPoint.getMFormula(), lts, A); // A[i] := eval(g)
+                A[boundedVariable] = X; // X' := A[i]
+                X = evaluate(*fixedPoint.getMFormula(), lts, A); // A[i] := eval(g)
             }
 
             return A[boundedVariable];
@@ -115,15 +126,12 @@ std::set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts,
             const auto &fixedPoint = dynamic_cast<const MaxFixedPoint &>(formula);
             const auto& boundedVariable = fixedPoint.getMFixedPointVariable();
 
-            // A[i] := S
-            std::set<int> S;
-            const auto& allStates = lts.getStates();
-            A[boundedVariable] = allStates;
+            A[boundedVariable] = lts.getStates();
 
-            std::set<int> X;
+            std::unordered_set<int> X = evaluate(*fixedPoint.getMFormula(), lts, A);
             while (X != A[boundedVariable]) {
-                X = A[boundedVariable]; // X' := A[i]
-                A[boundedVariable] = evaluate(*fixedPoint.getMFormula(), lts, A); // A[i] := eval(g)
+                A[boundedVariable] = X;
+                X = evaluate(*fixedPoint.getMFormula(), lts, A); // A[i] := eval(g)
             }
 
             return A[boundedVariable];
@@ -132,8 +140,13 @@ std::set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts,
             throw std::runtime_error("This should not be reachable. Switch statement not exhaustive...");
     }
 
-    std::set<int> empty;
+    std::unordered_set<int> empty;
     return empty;
 
+}
+
+std::unordered_set<int> NaiveAlgorithm::evaluate(const Formula &formula, const Lts &lts) {
+    Mapping map = {};
+    return evaluate(formula, lts, map);
 }
 

@@ -22,7 +22,6 @@ class MaxFixedPoint;
 class MinFixedPoint;
 class FixedPointVariable;
 class FixedPoint;
-struct FixedPointVariableHashFunction;
 
 
 class Formula {
@@ -45,7 +44,6 @@ public:
 
 
 class FixedPointVariable : public Formula {
-    friend FixedPointVariableHashFunction;
 public:
     explicit FixedPointVariable(const char fixedPointVariable) : Formula(FixedPointVariableType), mFixedPointVariable(fixedPointVariable){}
 
@@ -84,11 +82,10 @@ public:
     }
 
     struct HashFunction {
-        template <class T1, class T2>
-        std::size_t operator() (const FixedPointVariable<T1, T2> &node) const
+        std::size_t operator() (const FixedPointVariable &variable) const
         {
-            std::size_t h1 = std::hash<T1>()(node.x);
-            std::size_t h2 = std::hash<T2>()(node.y);
+            std::size_t h1 = std::hash<char>()(variable.mFixedPointVariable);
+            std::size_t h2 = std::hash<std::shared_ptr<FixedPoint>>()(variable.boundingFormula);
 
             return h1 ^ h2;
         }
@@ -102,12 +99,6 @@ private:
 
 
 
-struct FixedPointVariableHashFunction{
-    size_t operator()(const FixedPointVariable& a) const {
-        size_t xHash = std::hash<char>()(a.mFixedPointVariable);
-        return xHash;
-    }
-};
 
 
 
