@@ -6,25 +6,36 @@
 #include "NestingDepthCalculator.h"
 #include "AlternatingNestingDepthCalculator.h"
 #include "NaiveAlgorithm.h"
+#include "EmersonLeiAlgorithm.h"
 #include "DependentAlternationDepthCalculator.h"
 
 
 int main() {
 
-    Lts lts(parser_space::Parser::parseLts("resources/testcases/combined/test.aut"));
+    Lts lts(parser_space::Parser::parseLts("resources/dining/dining_2.aut"));
     std::cout << "nr of states " << lts.getNrOfStates() << std::endl;
     lts.printTransitionsOfStartState(3);
     lts.printTransitionsOfEndState(2);
 
     std::cout << std::endl;
 
-    auto form = parser_space::Parser::parseFormulaFile("resources/testcases/combined/form5.mcf");
+    auto form = parser_space::Parser::parseFormulaFile("resources/dining/invariantly_inevitably_eat.mcf");
+    form->printFormula();
 
     const auto& solution = NaiveAlgorithm::evaluate(*form, lts);
 
     for(const auto& el : solution) {
         std::cout << "state " << el << std::endl;
     }
+    std::cout << "number of iterations: " << NaiveAlgorithm::numberOfIterations;
+
+//    std::cout << "----second solution----" << std::endl;
+//
+//    const auto& solution2 = EmersonLeiAlgorithm::evaluate(*form, lts);
+//    for(const auto& el : solution) {
+//        std::cout << "state " << el << std::endl;
+//    }
+//    std::cout << "number of iterations: " << EmersonLeiAlgorithm::numberOfIterations;
 
 
 //    std::cout << "------------" << std::endl;

@@ -19,7 +19,8 @@ public:
 private:
     static std::unordered_set<int> evaluate(const Formula & formula, const Lts & lts, Mapping& A);
 
-
+public:
+    static int numberOfIterations;
 };
 
 #endif //MODALMUCHECKER_NAIVEALGORITHM_H

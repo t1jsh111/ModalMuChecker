@@ -29,6 +29,10 @@ void Lts::addTransition(int startState, std::string label, int endState) {
 }
 
 const std::unordered_set<std::shared_ptr<Lts::Transition>> & Lts::getTransitionsOfSourceState(int sourceState) const {
+    if(startStateToTransitions.count(sourceState) == 0) {
+        startStateToTransitions[sourceState] = startStateToTransitions.at(sourceState);
+
+    }
     return startStateToTransitions.at(sourceState);
 }
 

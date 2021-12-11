@@ -6,6 +6,8 @@
 #include "Formula.h"
 #include "Lts.h"
 
+int NaiveAlgorithm::numberOfIterations = 0;
+
 std::unordered_set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts, Mapping& A) {
     const Formula::FormulaType& formulaType = formula.getFormulaType();
     switch (formulaType) {
@@ -13,7 +15,7 @@ std::unordered_set<int> NaiveAlgorithm::evaluate(const Formula & formula, const 
             return lts.getStates();
         }
         case Formula::FalseType: { // Return Empty set
-            return std::unordered_set<int>();
+            return {};
         }
         case Formula::FixedPointVariableType: { // Return A[i]
             const auto& fixedPointVariable = dynamic_cast<const FixedPointVariable &>(formula);
@@ -97,13 +99,14 @@ std::unordered_set<int> NaiveAlgorithm::evaluate(const Formula & formula, const 
             const auto &fixedPoint = dynamic_cast<const MinFixedPoint &>(formula);
             const auto& boundedVariable = fixedPoint.getMFixedPointVariable();
 
-            A[boundedVariable] = std::unordered_set<int>();
+            A[boundedVariable] = {};
+            std::unordered_set<int> Xold;
+            do {
+                numberOfIterations++;
 
-            std::unordered_set<int> X = evaluate(*fixedPoint.getMFormula(), lts, A);
-            while (X != A[boundedVariable]) {
-                A[boundedVariable] = X; // X' := A[i]
-                X = evaluate(*fixedPoint.getMFormula(), lts, A); // A[i] := eval(g)
-            }
+                Xold = A[boundedVariable];
+                A[boundedVariable] = evaluate(*fixedPoint.getMFormula(), lts, A);
+            } while(Xold != A[boundedVariable]);
 
             return A[boundedVariable];
         }
@@ -126,11 +129,13 @@ std::unordered_set<int> NaiveAlgorithm::evaluate(const Formula & formula, const 
 
             A[boundedVariable] = lts.getStates();
 
-            std::unordered_set<int> X = evaluate(*fixedPoint.getMFormula(), lts, A);
-            while (X != A[boundedVariable]) {
-                A[boundedVariable] = X;
-                X = evaluate(*fixedPoint.getMFormula(), lts, A); // A[i] := eval(g)
-            }
+            std::unordered_set<int> Xold;
+            do {
+                numberOfIterations++;
+
+                Xold = A[boundedVariable];
+                A[boundedVariable] = evaluate(*fixedPoint.getMFormula(), lts, A);
+            } while(Xold != A[boundedVariable]);
 
             return A[boundedVariable];
         }
@@ -145,6 +150,9 @@ std::unordered_set<int> NaiveAlgorithm::evaluate(const Formula & formula, const 
 
 std::unordered_set<int> NaiveAlgorithm::evaluate(const Formula &formula, const Lts &lts) {
     Mapping map = {};
+
+    numberOfIterations = 0;
+
     return evaluate(formula, lts, map);
 }
 
