@@ -172,8 +172,8 @@ std::unordered_set<int> EmersonLeiAlgorithm::evaluate(const Formula &formula, co
             case FixedPoint::MaxFixedPointFormula: {
                 map[v] = lts.getStates();
             }
-            default:
-                throw std::runtime_error("This should not be reachable. Switch statement not exhaustive...");
+            //default:
+            //    throw std::runtime_error("This should not be reachable. Switch statement not exhaustive...");
         }
     }
 

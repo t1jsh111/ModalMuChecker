@@ -19,7 +19,7 @@ int main() {
 
     std::cout << std::endl;
 
-    auto form = parser_space::Parser::parseFormulaFile("resources/testcases/combined/form5.mcf");
+    auto form = parser_space::Parser::parseFormulaFile("resources/testcases/combined/form4.mcf");
 
     const auto& solution = NaiveAlgorithm::evaluate(*form, lts);
 
