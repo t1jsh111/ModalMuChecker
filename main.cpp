@@ -11,14 +11,14 @@
 
 int main() {
 
-    Lts lts(parser_space::Parser::parseLts("resources/testcases/boolean/test.aut"));
+    Lts lts(parser_space::Parser::parseLts("resources/testcases/combined/test.aut"));
     std::cout << "nr of states " << lts.getNrOfStates() << std::endl;
     lts.printTransitionsOfStartState(3);
     lts.printTransitionsOfEndState(2);
 
     std::cout << std::endl;
 
-    auto form = parser_space::Parser::parseFormulaFile("resources/testcases/modal_operators/form5.mcf");
+    auto form = parser_space::Parser::parseFormulaFile("resources/testcases/combined/form5.mcf");
 
     const auto& solution = NaiveAlgorithm::evaluate(*form, lts);
 

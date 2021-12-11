@@ -1,12 +1,12 @@
 //
-// Created by Milan Hutten on 5-12-2021.
+// Created by Milan Hutten on 11-12-2021.
 //
 
-#include "NaiveAlgorithm.h"
+#include "EmersonLeiAlgorithm.h"
 #include "Formula.h"
 #include "Lts.h"
 
-std::unordered_set<int> NaiveAlgorithm::evaluate(const Formula & formula, const Lts & lts, Mapping& A) {
+std::unordered_set<int> EmersonLeiAlgorithm::evaluate(const Formula & formula, const Lts & lts, Mapping& A) {
     const Formula::FormulaType& formulaType = formula.getFormulaType();
     switch (formulaType) {
         case Formula::TrueType: { // Return S
@@ -109,17 +109,17 @@ std::unordered_set<int> NaiveAlgorithm::evaluate(const Formula & formula, const 
         }
 
 
-        /*case Formula::MinFixedPointType: {
-            const auto &fixedPoint = dynamic_cast<const MinFixedPoint &>(formula);
-            int alternationDepth = std::max(1, computeAlternatingNestingDepth(*fixedPoint.getMFormula()));
-            auto maxFixedPoints = fixedPoint.getMFormula()->getMaxFixedPointFormulas();
-            for(const auto& maxFixedPoint : maxFixedPoints) {
-                alternationDepth = std::max(alternationDepth, 1 + computeAlternatingNestingDepth(maxFixedPoint));
-            }
+            /*case Formula::MinFixedPointType: {
+                const auto &fixedPoint = dynamic_cast<const MinFixedPoint &>(formula);
+                int alternationDepth = std::max(1, computeAlternatingNestingDepth(*fixedPoint.getMFormula()));
+                auto maxFixedPoints = fixedPoint.getMFormula()->getMaxFixedPointFormulas();
+                for(const auto& maxFixedPoint : maxFixedPoints) {
+                    alternationDepth = std::max(alternationDepth, 1 + computeAlternatingNestingDepth(maxFixedPoint));
+                }
 
-            return alternationDepth;
-            break;
-        }*/
+                return alternationDepth;
+                break;
+            }*/
         case Formula::MaxFixedPointType: {
             const auto &fixedPoint = dynamic_cast<const MaxFixedPoint &>(formula);
             const auto& boundedVariable = fixedPoint.getMFixedPointVariable();
@@ -143,8 +143,22 @@ std::unordered_set<int> NaiveAlgorithm::evaluate(const Formula & formula, const 
 
 }
 
-std::unordered_set<int> NaiveAlgorithm::evaluate(const Formula &formula, const Lts &lts) {
+std::unordered_set<int> EmersonLeiAlgorithm::evaluate(const Formula &formula, const Lts &lts) {
     Mapping map = {};
+
+    const auto& variables = formula.getFixedPointVariables();
+    for (FixedPointVariable v : variables) {
+        const FixedPoint::FixedPointFormulaType& formulaType = v.getBoundingFormula()->getFormulaType();
+        switch (formulaType) {
+            case FixedPoint::MinFixedPointFormula: {
+                map[v] = std::unordered_set<int>();
+            }
+            case FixedPoint::MaxFixedPointFormula: {
+                map[v] = lts.getStates();
+            }
+        }
+    }
+
     return evaluate(formula, lts, map);
 }
 

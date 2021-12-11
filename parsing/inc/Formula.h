@@ -77,6 +77,10 @@ public:
         boundingFormula = formula;
     }
 
+    std::shared_ptr<FixedPoint> getBoundingFormula() const {
+        return boundingFormula;
+    }
+
     bool operator==(const FixedPointVariable& rhs) const {
         return mFixedPointVariable == rhs.mFixedPointVariable && boundingFormula == rhs.boundingFormula;
     }
@@ -374,6 +378,10 @@ class FixedPoint {
 public:
     enum FixedPointFormulaType {MaxFixedPointFormula, MinFixedPointFormula};
     explicit FixedPoint(FixedPointFormulaType formulaType) : mFormulatype(formulaType) {}
+
+    FixedPointFormulaType getFormulaType() const {
+        return mFormulatype;
+    }
 private:
     const FixedPointFormulaType mFormulatype;
 };

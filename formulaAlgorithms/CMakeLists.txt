@@ -3,7 +3,7 @@ set(SOURCE_FILES
         src/AlternatingNestingDepthCalculator.cpp
         src/DependentAlternationDepthCalculator.cpp
         src/NaiveAlgorithm.cpp
-        )
+        inc/EmersonLeiAlgorithm.h src/EmersonLeiAlgorithm.cpp)
 
 set(HEADER_FILES
         inc/NestingDepthCalculator.h
