@@ -14,7 +14,7 @@ public:
 
     static std::unordered_set<int> evaluate(const Formula & formula, const Lts & lts);
 private:
-    static std::unordered_set<int> evaluate(const Formula & formula, const Lts & lts, Mapping& A);
+    static std::unordered_set<int> evaluate(const Formula & formula, const Lts & lts, Mapping& A, bool fixedPointBound);
 
 
 };

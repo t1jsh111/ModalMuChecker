@@ -6,7 +6,7 @@
 #include "Formula.h"
 #include "Lts.h"
 
-std::unordered_set<int> EmersonLeiAlgorithm::evaluate(const Formula & formula, const Lts & lts, Mapping& A) {
+std::unordered_set<int> EmersonLeiAlgorithm::evaluate(const Formula & formula, const Lts & lts, Mapping& A, bool fixedPointBound) {
     const Formula::FormulaType& formulaType = formula.getFormulaType();
     switch (formulaType) {
         case Formula::TrueType: { // Return S
@@ -28,8 +28,8 @@ std::unordered_set<int> EmersonLeiAlgorithm::evaluate(const Formula & formula, c
         }
         case Formula::ConjunctionType: { // Return eval(g1) n eval(g2)
             const auto& conjunction = dynamic_cast<const Conjunction&>(formula);
-            std::unordered_set<int> evalLeft = evaluate(*conjunction.getMLeftFormula(), lts, A);
-            std::unordered_set<int> evalRight = evaluate(*conjunction.getMRightFormula(), lts, A);
+            std::unordered_set<int> evalLeft = evaluate(*conjunction.getMLeftFormula(), lts, A, fixedPointBound);
+            std::unordered_set<int> evalRight = evaluate(*conjunction.getMRightFormula(), lts, A, fixedPointBound);
             std::unordered_set<int> intersection;
             for (int i : evalLeft) {
                 bool iExistsInRight = (evalRight.find(i) != evalRight.end());
@@ -41,8 +41,8 @@ std::unordered_set<int> EmersonLeiAlgorithm::evaluate(const Formula & formula, c
         }
         case Formula::DisjunctionType: { // Return eval(g1) u eval(g2)
             const auto& disjunction = dynamic_cast<const Disjunction&>(formula);
-            std::unordered_set<int> evalLeft = evaluate(*disjunction.getMLeftFormula(), lts, A);
-            std::unordered_set<int> evalRight = evaluate(*disjunction.getMRightFormula(), lts, A);
+            std::unordered_set<int> evalLeft = evaluate(*disjunction.getMLeftFormula(), lts, A, fixedPointBound);
+            std::unordered_set<int> evalRight = evaluate(*disjunction.getMRightFormula(), lts, A, fixedPointBound);
             std::unordered_set<int> setUnion = evalLeft;
             for (int i : evalRight) { // since setUnion we can simply add all elements. Set property will ensure no duplicates are there.
                 setUnion.emplace(i);
@@ -51,7 +51,7 @@ std::unordered_set<int> EmersonLeiAlgorithm::evaluate(const Formula & formula, c
         }
         case Formula::BoxType: { // {s in S | All t in S: s -a-> t ==> t in eval(g)}
             const auto &box = dynamic_cast<const Box &>(formula);
-            std::unordered_set<int> eval = evaluate(*box.getMFormula(), lts, A);
+            std::unordered_set<int> eval = evaluate(*box.getMFormula(), lts, A, fixedPointBound);
             std::string label = box.getMActionLabel();
             std::unordered_set<int> boxed;
             for (const auto& state : lts.getStates()) {
@@ -75,7 +75,7 @@ std::unordered_set<int> EmersonLeiAlgorithm::evaluate(const Formula & formula, c
         }
         case Formula::DiamondType: {
             const auto &diamond = dynamic_cast<const Diamond &>(formula);
-            std::unordered_set<int> eval = evaluate(*diamond.getMFormula(), lts, A);
+            std::unordered_set<int> eval = evaluate(*diamond.getMFormula(), lts, A, fixedPointBound);
             std::string label = diamond.getMActionLabel();
             std::unordered_set<int> diamonded;
             for (const auto& state : lts.getStates()) {
@@ -95,14 +95,22 @@ std::unordered_set<int> EmersonLeiAlgorithm::evaluate(const Formula & formula, c
         }
         case Formula::MinFixedPointType: {
             const auto &fixedPoint = dynamic_cast<const MinFixedPoint &>(formula);
+
+            if (fixedPointBound) {
+                const auto& minFixedPoints = fixedPoint.getMinFixedPointFormulas();
+                for (MinFixedPoint min : minFixedPoints) {
+                    A[min.getMFixedPointVariable()] = std::unordered_set<int>();
+                }
+            }
+
             const auto& boundedVariable = fixedPoint.getMFixedPointVariable();
 
-            A[boundedVariable] = std::unordered_set<int>();
+            //A[boundedVariable] = std::unordered_set<int>();
 
-            std::unordered_set<int> X = evaluate(*fixedPoint.getMFormula(), lts, A);
+            std::unordered_set<int> X = evaluate(*fixedPoint.getMFormula(), lts, A, false);
             while (X != A[boundedVariable]) {
                 A[boundedVariable] = X; // X' := A[i]
-                X = evaluate(*fixedPoint.getMFormula(), lts, A); // A[i] := eval(g)
+                X = evaluate(*fixedPoint.getMFormula(), lts, A, false); // A[i] := eval(g)
             }
 
             return A[boundedVariable];
@@ -122,14 +130,22 @@ std::unordered_set<int> EmersonLeiAlgorithm::evaluate(const Formula & formula, c
             }*/
         case Formula::MaxFixedPointType: {
             const auto &fixedPoint = dynamic_cast<const MaxFixedPoint &>(formula);
+
+            if (!fixedPointBound) {
+                const auto& maxFixedPoints = fixedPoint.getMaxFixedPointFormulas();
+                for (MaxFixedPoint max : maxFixedPoints) {
+                    A[max.getMFixedPointVariable()] = lts.getStates();
+                }
+            }
+
             const auto& boundedVariable = fixedPoint.getMFixedPointVariable();
 
-            A[boundedVariable] = lts.getStates();
+            //A[boundedVariable] = lts.getStates();
 
-            std::unordered_set<int> X = evaluate(*fixedPoint.getMFormula(), lts, A);
+            std::unordered_set<int> X = evaluate(*fixedPoint.getMFormula(), lts, A, true);
             while (X != A[boundedVariable]) {
                 A[boundedVariable] = X;
-                X = evaluate(*fixedPoint.getMFormula(), lts, A); // A[i] := eval(g)
+                X = evaluate(*fixedPoint.getMFormula(), lts, A, true); // A[i] := eval(g)
             }
 
             return A[boundedVariable];
@@ -156,9 +172,11 @@ std::unordered_set<int> EmersonLeiAlgorithm::evaluate(const Formula &formula, co
             case FixedPoint::MaxFixedPointFormula: {
                 map[v] = lts.getStates();
             }
+            default:
+                throw std::runtime_error("This should not be reachable. Switch statement not exhaustive...");
         }
     }
 
-    return evaluate(formula, lts, map);
+    return evaluate(formula, lts, map, NULL);
 }
 

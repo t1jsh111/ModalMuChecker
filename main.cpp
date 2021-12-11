@@ -6,6 +6,7 @@
 #include "NestingDepthCalculator.h"
 #include "AlternatingNestingDepthCalculator.h"
 #include "NaiveAlgorithm.h"
+#include "EmersonLeiAlgorithm.h"
 #include "DependentAlternationDepthCalculator.h"
 
 
@@ -23,6 +24,12 @@ int main() {
     const auto& solution = NaiveAlgorithm::evaluate(*form, lts);
 
     for(const auto& el : solution) {
+        std::cout << "state " << el << std::endl;
+    }
+
+    const auto& solution2 = EmersonLeiAlgorithm::evaluate(*form, lts);
+
+    for(const auto& el : solution2) {
         std::cout << "state " << el << std::endl;
     }
 
