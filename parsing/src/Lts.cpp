@@ -10,29 +10,30 @@ Lts::Lts(int initialState, int nrOfTransitions, int nrOfStates) :
 {
     for(int i = 0; i < nrOfStates; i++) {
         this->states.insert(i);
+        startStateToTransitions[i] = std::unordered_set<std::shared_ptr<Transition>>();
+        endStateToTransitions[i] = std::unordered_set<std::shared_ptr<Transition>>();
     }
 }
 
 void Lts::addTransition(int startState, std::string label, int endState) {
     std::shared_ptr<Transition> transition(new Transition{startState, label, endState});
-    // If map does not contain startState as key, add a set for it
-    if(startStateToTransitions.count(startState) <= 0) {
-        startStateToTransitions.insert(std::pair<int,std::unordered_set<std::shared_ptr<Transition>>>(startState,{}));
-    }
-    // If map does not contain endState as key, add a set for it
-    if(endStateToTransitions.count(endState) <= 0) {
-        endStateToTransitions.insert(std::pair<int,std::unordered_set<std::shared_ptr<Transition>>>(endState,{}));
-    }
+//    // If map does not contain startState as key, add a set for it
+//    if(startStateToTransitions.count(startState) <= 0) {
+//        startStateToTransitions.insert(std::pair<int,std::unordered_set<std::shared_ptr<Transition>>>(startState,{}));
+//    }
+//    // If map does not contain endState as key, add a set for it
+//    if(endStateToTransitions.count(endState) <= 0) {
+//        endStateToTransitions.insert(std::pair<int,std::unordered_set<std::shared_ptr<Transition>>>(endState,{}));
+//    }
 
     startStateToTransitions.at(startState).insert(transition);
     endStateToTransitions.at(endState).insert(transition);
 }
 
 const std::unordered_set<std::shared_ptr<Lts::Transition>> & Lts::getTransitionsOfSourceState(int sourceState) const {
-    if(startStateToTransitions.count(sourceState) == 0) {
-        startStateToTransitions[sourceState] = startStateToTransitions.at(sourceState);
-
-    }
+//    if(startStateToTransitions.count(sourceState) == 0) {
+//        startStateToTransitions[sourceState] = startStateToTransitions.at(sourceState);
+//    }
     return startStateToTransitions.at(sourceState);
 }
 

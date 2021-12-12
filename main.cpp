@@ -12,30 +12,33 @@
 
 int main() {
 
-    Lts lts(parser_space::Parser::parseLts("resources/dining/dining_2.aut"));
+    Lts lts(parser_space::Parser::parseLts("resources/dining/dining_9.aut"));
     std::cout << "nr of states " << lts.getNrOfStates() << std::endl;
     lts.printTransitionsOfStartState(3);
-    lts.printTransitionsOfEndState(2);
+    lts.printTransitionsOfEndState(0);
 
     std::cout << std::endl;
 
     auto form = parser_space::Parser::parseFormulaFile("resources/dining/invariantly_inevitably_eat.mcf");
+
     form->printFormula();
 
+    std::cout << std::endl;
     const auto& solution = NaiveAlgorithm::evaluate(*form, lts);
 
     for(const auto& el : solution) {
         std::cout << "state " << el << std::endl;
     }
-    std::cout << "number of iterations: " << NaiveAlgorithm::numberOfIterations;
+    std::cout << std::endl;
+    std::cout << "number of iterations: " << NaiveAlgorithm::numberOfIterations << std::endl;
 
-//    std::cout << "----second solution----" << std::endl;
-//
-//    const auto& solution2 = EmersonLeiAlgorithm::evaluate(*form, lts);
-//    for(const auto& el : solution) {
-//        std::cout << "state " << el << std::endl;
-//    }
-//    std::cout << "number of iterations: " << EmersonLeiAlgorithm::numberOfIterations;
+    std::cout << "----second solution----" << std::endl;
+
+    const auto& solution2 = EmersonLeiAlgorithm::evaluate(*form, lts);
+    for(const auto& el : solution2) {
+        std::cout << "state " << el << std::endl;
+    }
+    std::cout << "number of iterations: " << EmersonLeiAlgorithm::numberOfIterations;
 
 
 //    std::cout << "------------" << std::endl;
