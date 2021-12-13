@@ -1,4 +1,6 @@
 #include <iostream>
+#include <filesystem>
+#include <algorithm>
 #include "Parser.h"
 #include "Tokenizer.h"
 #include <vector>
@@ -9,36 +11,98 @@
 #include "EmersonLeiAlgorithm.h"
 #include "DependentAlternationDepthCalculator.h"
 
+std::string getFileName(const std::string& filePath) {
+    int lastSlashLocation = 0;
+    int nameLength = 0;
+
+    for(size_t i = filePath.size() - 1; i >= 0; i--) {
+        if(filePath[i] == '/') {
+            lastSlashLocation = i;
+            nameLength = filePath.size() - 1 - lastSlashLocation;
+            break;
+        }
+    }
+
+    return filePath.substr(lastSlashLocation+1,nameLength);
+}
+
+void testFolder(const std::string& folderPath) {
+
+    std::vector<std::string> formulas;
+    std::vector<std::string> transitionSystems;
+
+    for(const auto& dirEntry : std::filesystem::recursive_directory_iterator(folderPath)) {
+        std::string fileLocation = dirEntry.path();
+
+        if(fileLocation.substr(fileLocation.size() - 4, 4) == ".mcf") {
+            formulas.push_back(fileLocation);
+        } else if (fileLocation.substr(fileLocation.size() - 4, 4) == ".aut") {
+            transitionSystems.push_back(fileLocation);
+        }
+    }
+
+    std::sort(formulas.begin(), formulas.end());
+    std::sort(transitionSystems.begin(), transitionSystems.end());
+
+
+
+    for(const auto& transitionSystem : transitionSystems) {
+        std::cout << "----" << transitionSystem << "----" << std::endl;
+        Lts lts(parser_space::Parser::parseLts(transitionSystem));
+        for(const auto& formula : formulas) {
+            auto form = parser_space::Parser::parseFormulaFile(formula);
+            const auto& solution = NaiveAlgorithm::evaluate(*form, lts);
+            std::cout << getFileName(formula) << " = ";
+            std::cout << "{ ";
+            for(const auto& el : solution) {
+                std::cout << el << ", ";
+            }
+            std::cout << "}" << std::endl;
+        }
+    }
+
+}
 
 int main() {
 
-    Lts lts(parser_space::Parser::parseLts("resources/dining/dining_11.aut"));
-    std::cout << "nr of states " << lts.getNrOfStates() << std::endl;
-    lts.printTransitionsOfStartState(3);
-    lts.printTransitionsOfEndState(0);
+    std::string filePath = "resources/testcases/fixpoints_only/";
+    testFolder(filePath);
+//    std::cout << "-----" << std::endl;
 
-    std::cout << std::endl;
 
-    auto form = parser_space::Parser::parseFormulaFile("resources/dining/invariantly_inevitably_eat.mcf");
+//    Lts lts(parser_space::Parser::parseLts("resources/testcases/modal_operators/test.aut"));
 
-    form->printFormula();
 
-    std::cout << std::endl;
-    const auto& solution = NaiveAlgorithm::evaluate(*form, lts);
+//    for(int i = 1; i < 6; i++) {
+//        //std::cout << "resources/testcases/boolean/form" + std::to_string(i) + ".mcf";
+//        auto form = parser_space::Parser::parseFormulaFile("resources/testcases/modal_operators/form" + std::to_string(i) + ".mcf");
+//        const auto& solution = NaiveAlgorithm::evaluate(*form, lts);
+//        std::cout << "form" << i << ": ";
+//        std::cout << "{ ";
+//        for(const auto& el : solution) {
+//             std::cout << el << ", ";
+//        }
+//        std::cout << "}" << std::endl;
+//    }
 
-    for(const auto& el : solution) {
-        std::cout << "state " << el << std::endl;
-    }
-    std::cout << std::endl;
-    std::cout << "number of iterations: " << NaiveAlgorithm::numberOfIterations << std::endl;
+//    const auto& solution = NaiveAlgorithm::evaluate(*form, lts);
+//
+//    for(const auto& el : solution) {
+//        std::cout << "state " << el << std::endl;
+//    }
 
-    std::cout << "----second solution----" << std::endl;
 
-    const auto& solution2 = EmersonLeiAlgorithm::evaluate(*form, lts);
-    for(const auto& el : solution2) {
-        std::cout << "state " << el << std::endl;
-    }
-    std::cout << "number of iterations: " << EmersonLeiAlgorithm::numberOfIterations;
+
+//    std::cout << std::endl;
+//    std::cout << "number of iterations: " << NaiveAlgorithm::numberOfIterations << std::endl;
+//
+//    std::cout << "----second solution----" << std::endl;
+//
+//    const auto& solution2 = EmersonLeiAlgorithm::evaluate(*form, lts);
+//    for(const auto& el : solution2) {
+//        std::cout << "state " << el << std::endl;
+//    }
+//    std::cout << "number of iterations: " << EmersonLeiAlgorithm::numberOfIterations;
 
 
 //    std::cout << "------------" << std::endl;
