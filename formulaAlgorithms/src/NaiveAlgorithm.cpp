@@ -57,11 +57,11 @@ std::unordered_set<int> NaiveAlgorithm::evaluate(const Formula & formula, const 
             std::string label = box.getMActionLabel();
             std::unordered_set<int> boxed;
             for (const auto& state : lts.getStates()) {
-                const std::unordered_set<std::shared_ptr<Lts::Transition>>& transitions = lts.getTransitionsOfSourceState(state);
+                const auto& transitions = lts.getTransitionsOfSourceState(state);
                 bool emplace = true;
                 for (const auto& transition : transitions) {
                     bool transitionWithLabelToStateNotInEval =
-                            (transition->label == label && eval.find(transition->endState) == eval.end());
+                            (transition.label == label && eval.find(transition.endState) == eval.end());
 
                     if (transitionWithLabelToStateNotInEval) { // s -a-> t =/=> t in eval(g)
                         // hence universal quantifier is violated
@@ -81,10 +81,10 @@ std::unordered_set<int> NaiveAlgorithm::evaluate(const Formula & formula, const 
             std::string label = diamond.getMActionLabel();
             std::unordered_set<int> diamonded;
             for (const auto& state : lts.getStates()) {
-                const std::unordered_set<std::shared_ptr<Lts::Transition>>& transitions = lts.getTransitionsOfSourceState(state);
+                const auto& transitions = lts.getTransitionsOfSourceState(state);
 
                 for (const auto& transition : transitions) {
-                    bool transitionWithLabelToStateInEval = transition->label == label && eval.find(transition->endState) != eval.end();
+                    bool transitionWithLabelToStateInEval = transition.label == label && eval.find(transition.endState) != eval.end();
 
                     if (transitionWithLabelToStateInEval) { // s -a-> t & t in eval(g)
                         // Hence existential quantifier holds
