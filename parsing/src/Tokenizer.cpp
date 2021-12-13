@@ -21,6 +21,11 @@ namespace parser_space {
             char d = modalFormula[i];
 
             switch (currCh) {
+                case '%':
+                    while(modalFormula[i] != '\n') {
+                        i++;
+                    }
+                    break;
                 case 't':
                     if (currentToken.mType == WHITESPACE) {
                         if (modalFormula.substr(i, 4) == "true") {

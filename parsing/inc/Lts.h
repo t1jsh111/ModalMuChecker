@@ -19,7 +19,7 @@ class Lts {
 public:
     struct Transition {
         int startingState;
-        std::string_view label;
+        std::string label;
         int endState;
 
         void printTransition() const;
@@ -32,7 +32,7 @@ public:
             std::size_t operator() (const Transition &transition) const
             {
                 std::size_t h1 = std::hash<int>()(transition.startingState);
-                std::size_t h2 = std::hash<std::string_view>()(transition.label);
+                std::size_t h2 = std::hash<std::string>()(transition.label);
                 std::size_t h3 = std::hash<int>()(transition.endState);
 
                 return h1 ^ h2 ^ h3;

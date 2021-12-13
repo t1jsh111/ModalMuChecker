@@ -12,7 +12,7 @@
 
 int main() {
 
-    Lts lts(parser_space::Parser::parseLts("resources/dining/dining_11.aut"));
+    Lts lts(parser_space::Parser::parseLts("resources/dining/dining_9.aut"));
     std::cout << "nr of states " << lts.getNrOfStates() << std::endl;
     lts.printTransitionsOfStartState(3);
     lts.printTransitionsOfEndState(0);
