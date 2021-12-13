@@ -15,3 +15,5 @@ target_link_libraries(ModalMuChecker PUBLIC FormulaAlgorithmsLibrary)
 target_include_directories(ModalMuChecker PUBLIC formulaAlgorithms/inc)
 
 file(COPY ${ModalMuChecker_SOURCE_DIR}/resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+add_subdirectory(unit_testing)

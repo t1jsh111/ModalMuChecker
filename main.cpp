@@ -12,14 +12,14 @@
 
 int main() {
 
-    Lts lts(parser_space::Parser::parseLts("resources/dining/dining_9.aut"));
+    Lts lts(parser_space::Parser::parseLts("resources/testcases/boolean/test.aut"));
     std::cout << "nr of states " << lts.getNrOfStates() << std::endl;
     lts.printTransitionsOfStartState(3);
     lts.printTransitionsOfEndState(0);
 
     std::cout << std::endl;
 
-    auto form = parser_space::Parser::parseFormulaFile("resources/dining/invariantly_inevitably_eat.mcf");
+    auto form = parser_space::Parser::parseFormulaFile("resources/testcases/boolean/form1.mcf");
 
     form->printFormula();
 
