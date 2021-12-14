@@ -15,7 +15,6 @@
 using namespace std::chrono;
 
 enum Algorithm {Naive, EmersonLei};
-enum Data {States, Initial, Iterations, Milliseconds};
 
 std::string getFileName(const std::string& filePath) {
     int lastSlashLocation = 0;
@@ -32,7 +31,7 @@ std::string getFileName(const std::string& filePath) {
     return filePath.substr(lastSlashLocation+1,nameLength);
 }
 
-void testFolder(const std::string& folderPath, Algorithm alg, Data data) {
+void testFolder(const std::string& folderPath, Algorithm alg, int loop_bound, bool printStates) {
 
     std::vector<std::string> formulas;
     std::vector<std::string> transitionSystems;
@@ -50,19 +49,25 @@ void testFolder(const std::string& folderPath, Algorithm alg, Data data) {
     std::sort(formulas.begin(), formulas.end());
     std::sort(transitionSystems.begin(), transitionSystems.end());
 
+    int sizeT = sizeof transitionSystems;
+    int sizeF = sizeof formulas;
 
+    std::vector<bool> satisfied;
+    std::vector<int> iterations;
+    std::vector<double> ms;
+    //int k = 0;
+    //int l = 0;
 
+    std::cout << "+----States----+" << std::endl;
     for(const auto& transitionSystem : transitionSystems) {
         std::cout << "----" << transitionSystem << "----" << std::endl;
         Lts lts(parser_space::Parser::parseLts(transitionSystem));
         for(const auto& formula : formulas) {
             auto form = parser_space::Parser::parseFormulaFile(formula);
             std::unordered_set<int> solution = std::unordered_set<int>();
-            int iterations = 0;
-            high_resolution_clock::time_point t1;// = high_resolution_clock::now();
-            high_resolution_clock::time_point t2;// = high_resolution_clock::now();
+            high_resolution_clock::time_point t1;
+            high_resolution_clock::time_point t2;
             double avg_time_span = 0;
-            int loop_bound = 5;
 
             for (int i = 0; i < loop_bound; i++) {
                 switch (alg) {
@@ -70,51 +75,69 @@ void testFolder(const std::string& folderPath, Algorithm alg, Data data) {
                         t1 = high_resolution_clock::now();
                         solution = NaiveAlgorithm::evaluate(*form, lts);
                         t2 = high_resolution_clock::now();
-                        iterations = NaiveAlgorithm::numberOfIterations;
                         break;
                     }
                     case Algorithm::EmersonLei: {
                         t1 = high_resolution_clock::now();
                         solution = EmersonLeiAlgorithm::evaluate(*form, lts);
                         t2 = high_resolution_clock::now();
-                        iterations = EmersonLeiAlgorithm::numberOfIterations;
                         break;
                     }
                 }
                 avg_time_span += duration_cast<milliseconds>(t2 - t1).count();
+            }
 
-                if (data != Milliseconds) {
+            if(solution.find(lts.initialState) != solution.end()) {
+                satisfied.push_back(true);
+            } else {
+                satisfied.push_back(false);
+            }
+
+            switch(alg) {
+                case Naive: {
+                    iterations.push_back(NaiveAlgorithm::numberOfIterations);
+                    break;
+                }
+                case EmersonLei: {
+                    iterations.push_back(EmersonLeiAlgorithm::numberOfIterations);
                     break;
                 }
             }
 
-            std::cout << getFileName(formula) << " = ";
-            switch(data) {
-                case States: {
-                    std::cout << "{ ";
-                    for(const auto& el : solution) {
-                        std::cout << el << ", ";
-                    }
-                    std::cout << "}" << std::endl;
-                    break;
+            ms.push_back(avg_time_span/loop_bound);
+
+            if(printStates) {
+                std::cout << getFileName(formula) << " = ";
+                std::cout << "{ ";
+                for (const auto &el: solution) {
+                    std::cout << el << ", ";
                 }
-                case Initial: {
-                    if(solution.find(lts.initialState) != solution.end()) {
-                        std::cout << "true" << std::endl;
-                        break;
-                    }
-                    std::cout << "false" << std::endl;
-                    break;
-                }
-                case Iterations: {
-                    std::cout << iterations << " iterations" << std::endl;
-                    break;
-                }
-                case Milliseconds: {
-                    std::cout << avg_time_span/loop_bound << " milliseconds" << std::endl;
-                    break;
-                }
+                std::cout << "}" << std::endl;
             }
+        }
+    }
+
+    std::cout << "+----Satisfaction----+" << std::endl;
+    for(int i = 0; i < sizeT; i++) {
+        std::cout << "----" << transitionSystems.at(i) << "----" << std::endl;
+        for(int j = 0; j < sizeF; j++) {
+            std::cout << getFileName(formulas.at(j)) << " = " << satisfied.at(i * sizeT + j) << std::endl;
+        }
+    }
+
+    std::cout << "+----Iterations----+" << std::endl;
+    for(int i = 0; i < sizeT; i++) {
+        std::cout << "----" << transitionSystems.at(i) << "----" << std::endl;
+        for(int j = 0; j < sizeF; j++) {
+            std::cout << getFileName(formulas.at(j)) << " = " << iterations.at(i * sizeT + j) << std::endl;
+        }
+    }
+
+    std::cout << "+----Milliseconds----+" << std::endl;
+    for(int i = 0; i < sizeT; i++) {
+        std::cout << "----" << transitionSystems.at(i) << "----" << std::endl;
+        for(int j = 0; j < sizeF; j++) {
+            std::cout << getFileName(formulas.at(j)) << " = " << ms.at(i * sizeT + j) << std::endl;
         }
     }
 }
@@ -122,7 +145,7 @@ void testFolder(const std::string& folderPath, Algorithm alg, Data data) {
 int main() {
 
     std::string filePath = "resources/ccp/";
-    testFolder(filePath, Algorithm::Naive, Data::Milliseconds);
+    testFolder(filePath, Algorithm::Naive, 1, false);
 //    std::cout << "-----" << std::endl;
 
 
