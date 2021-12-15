@@ -145,7 +145,15 @@ void testFolder(const std::string& folderPath, Algorithm alg, int loop_bound, bo
 int main() {
 
     std::string filePath = "resources/ccp/";
-    testFolder(filePath, Algorithm::Naive, 1, false);
+    //testFolder(filePath, Algorithm::Naive, 1, false);
+
+    auto slideExample2 = parser_space::Parser::parseFormulaFile("resources/ccp/invariantly_possibly_exclusive_access.mcf");
+    slideExample2->printFormula();
+    std::cout << std::endl;
+    std::cout << "Nesting depth: " << NestingDepthCalculator::computeNestingDepth(*slideExample2) << std::endl;
+    std::cout << "Alternating depth: " << AlternatingNestingDepthCalculator::computeAlternatingNestingDepth(*slideExample2) << std::endl;
+    std::cout << "depending alternating depth: " << DependentAlternationDepthCalculator::computeDependentAlternatingNestingDepth(*slideExample2) << std::endl;
+
 //    std::cout << "-----" << std::endl;
 
 
