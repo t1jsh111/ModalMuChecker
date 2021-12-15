@@ -105,7 +105,8 @@ namespace parser_space {
                 case 'g' ... 'l':
                 case 'o' ... 's':
                 case 'u' ... 'z':
-                case 0 ... 9:
+                case '0' ... '9':
+                case '_':
                     currentToken.mType = ACTION_LABEL;
                     currentToken.mText.append(1, currCh);
                     break;
