@@ -26,10 +26,22 @@
 
 int main() {
 
+
+    std::cout << "Welcome to the ModelMuChecker!" << std::endl;
+    std::cout << "-----" << std::endl;
+    std::cout << "Press 1 to compute all information of a folder containing transitionsystems and formulas";
+    std::cout << "-----" << std::endl;
+    std::cout << "Press 2 to compute all" << std::endl;
+    std::cout << "-----" << std::endl;
+
     std::string filePath = "resources/demanding/";
     //auto form = parser_space::Parser::parseFormulaFile("resources/demanding/questions_can_be_answered.mcf");
 //    auto form = parser_space::Parser::parseFormulaFile("resources/demanding/questions_will_be_answered.mcf");
 //    form->printFormula();
+
+
+
+
     DataPrinter printer;
     printer.printTables("resources/demanding");
 
@@ -66,7 +78,7 @@ void printDepths(const std::string& folderPath) {
     std::vector<std::string> transitionSystems;
 
     for(const auto& dirEntry : std::filesystem::recursive_directory_iterator(folderPath)) {
-        std::string fileLocation = dirEntry.path();
+        std::string fileLocation = dirEntry.path().generic_string();
 
         if(fileLocation.substr(fileLocation.size() - 4, 4) == ".mcf") {
             formulas.push_back(fileLocation);
@@ -98,7 +110,7 @@ void testFolder(const std::string& folderPath) {
     std::vector<std::string> transitionSystems;
 
     for(const auto& dirEntry : std::filesystem::recursive_directory_iterator(folderPath)) {
-        std::string fileLocation = dirEntry.path();
+        std::string fileLocation = dirEntry.path().generic_string();
 
         if(fileLocation.substr(fileLocation.size() - 4, 4) == ".mcf") {
             formulas.push_back(fileLocation);

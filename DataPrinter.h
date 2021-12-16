@@ -6,6 +6,7 @@
 #define MODALMUCHECKER_DATAPRINTER_H
 
 #include <string>
+#include <vector>
 
 class DataPrinter {
 public:

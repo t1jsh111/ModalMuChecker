@@ -30,7 +30,7 @@ void DataPrinter::printTimingTable(std::string folderPath) {
     std::vector<std::string> transitionSystems;
 
     for(const auto& dirEntry : std::filesystem::recursive_directory_iterator(folderPath)) {
-        std::string fileLocation = dirEntry.path();
+        std::string fileLocation = dirEntry.path().generic_string();
 
         if(fileLocation.substr(fileLocation.size() - 4, 4) == ".mcf") {
             formulas.push_back(fileLocation);
@@ -170,7 +170,7 @@ void DataPrinter::printTables(std::string folderPath) {
     std::vector<std::string> transitionSystems;
 
     for(const auto& dirEntry : std::filesystem::recursive_directory_iterator(folderPath)) {
-        std::string fileLocation = dirEntry.path();
+        std::string fileLocation = dirEntry.path().generic_string();
 
         if(fileLocation.substr(fileLocation.size() - 4, 4) == ".mcf") {
             formulas.push_back(fileLocation);
