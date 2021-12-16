@@ -19,79 +19,9 @@
 #include "DependentAlternationDepthCalculator.h"
 #include <filesystem>
 
-void DataPrinter::printNumberOfFixedPoints(std::string folderPath) {
-
-}
-
-
-void DataPrinter::printTimingTable(std::string folderPath) {
-
-    std::vector<std::string> formulas;
-    std::vector<std::string> transitionSystems;
-
-    for(const auto& dirEntry : std::filesystem::recursive_directory_iterator(folderPath)) {
-        std::string fileLocation = dirEntry.path().generic_string();
-
-        if(fileLocation.substr(fileLocation.size() - 4, 4) == ".mcf") {
-            formulas.push_back(fileLocation);
-        } else if (fileLocation.substr(fileLocation.size() - 4, 4) == ".aut") {
-            transitionSystems.push_back(fileLocation);
-        }
-    }
-
-    std::sort(formulas.begin(), formulas.end(), SI::natural::compare<std::string>);
-    std::sort(transitionSystems.begin(), transitionSystems.end(), SI::natural::compare<std::string>);
 
 
 
-    for(const auto& formula : formulas) {
-        std::cout << std::endl;
-        std::cout << "=====" << getFileName(formula) << "====" << std::endl;
-        std::vector<std::string> line1;
-        std::vector<std::string> line2;
-        std::vector<std::string> line3;
-
-
-        for(const auto& transitionSystem : transitionSystems) {
-            std::string fileName = getFileName(transitionSystem);
-            fileName = ReplaceAll(fileName, "_", "\\_");
-            fileName = ReplaceAll(fileName, ".aut", "");
-
-            line1.push_back(" & " + fileName);
-
-            Lts lts(parser_space::Parser::parseLts(transitionSystem));
-            auto form = parser_space::Parser::parseFormulaFile(formula);
-
-            auto start = std::chrono::high_resolution_clock::now();
-            const auto& solution = NaiveAlgorithm::evaluate(*form, lts);
-            auto end = std::chrono::high_resolution_clock::now();
-
-
-
-            auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end-start);
-            double dur = (double) duration.count() / 1000;
-            std::string durStr = std::to_string(dur);
-            durStr.erase ( durStr.find_last_not_of('0') + 1, std::string::npos );
-            line2.push_back(durStr);
-
-
-            start = std::chrono::high_resolution_clock::now();
-            const auto& solutionEmerson = EmersonLeiAlgorithm::evaluate(*form, lts);
-            end = std::chrono::high_resolution_clock::now();
-
-            auto durationEmerson = std::chrono::duration_cast<std::chrono::nanoseconds>(end-start);
-            dur = (double) durationEmerson.count() / 1000;
-            durStr = std::to_string(dur);
-            durStr.erase ( durStr.find_last_not_of('0') + 1, std::string::npos );
-            line3.push_back(durStr);
-
-        }
-
-        printLines(line1, line2, line3);
-
-        std::cout << "================" << std::endl;
-    }
-}
 
 void DataPrinter::printLines(std::vector<std::string> line1, std::vector<std::string> line2, std::vector<std::string> line3) {
     int numberOfTables = std::ceil( (double) line1.size() / 5 );
@@ -101,35 +31,40 @@ void DataPrinter::printLines(std::vector<std::string> line1, std::vector<std::st
 
         std::cout << " ";
         for(int j = i*5; j - (i*5) < 5; j++) {
-            int index = std::min(j, (int) line1.size() - 1);
-//
-//            if ((index % 5) == 0) {
-//                std::cout << " ";
-//            }
-            std::cout << line1[index];
+            //int index = std::min(j, (int) line1.size() - 1);
+            if(j < line1.size() ) {
+                std::cout << " & " << line1[j];
+            } else {
+                std::cout << " & ";
+            }
+
 
         }
         std::cout << "\\\\\\hline" << std::endl;
 
         std::cout << "\\textbf{Naive}";
         for(int j = i*5; j - (i*5) < 5; j++) {
-            int index = std::min(j, (int) line1.size() - 1);
 
-//            if ((index % 5) == 0) {
-//                std::cout << "\\textbf{Naive}";
-//            }
-            std::cout << " & " << line2[index];
+            if(j < line2.size()) {
+                std::cout << " & " << line2[j];
+            } else {
+                std::cout << " & ";
+            }
+
+
 
         }
         std::cout << "\\\\\\hline" << std::endl;
 
         std::cout << "\\textbf{Emerson}";
         for(int j = i*5; j - (i*5) < 5; j++) {
-            int index = std::min(j, (int) line1.size() - 1);
-//            if ((index % 5) == 0) {
-//                std::cout << "\\textbf{Emerson}";
-//            }
-            std::cout << " & " << line3[index];
+
+            if(j < line3.size() ) {
+                std::cout << " & " << line3[j];
+            } else {
+                std::cout << " & ";
+            }
+
 
         }
         std::cout << "\\\\\\hline" << std::endl;
@@ -209,9 +144,9 @@ void DataPrinter::printTables(std::string folderPath) {
             fileName = ReplaceAll(fileName, "_", "\\_");
             fileName = ReplaceAll(fileName, ".aut", "");
 
-            timingLine1.push_back(" & " + fileName);
-            iterationsLine1.push_back(" & " + fileName);
-            initSat1.push_back(" & " + fileName);
+            timingLine1.push_back( fileName);
+            iterationsLine1.push_back( fileName);
+            initSat1.push_back( fileName);
 
             Lts lts(parser_space::Parser::parseLts(transitionSystem));
 
@@ -271,5 +206,44 @@ void DataPrinter::printTables(std::string folderPath) {
         std::cout << "\\end{itemize}" << std::endl;
 
         std::cout << "%================" << std::endl;
+    }
+}
+
+void DataPrinter::printInformationSingleFormulaAndLts(const Formula &formula, const Lts &lts,
+                                                      DataPrinter::AlgorithmType algorithmType) {
+    switch (algorithmType) {
+        case Naive: {
+            auto start = std::chrono::high_resolution_clock::now();
+            const auto& solutionNaive = NaiveAlgorithm::evaluate(formula, lts);
+            auto end = std::chrono::high_resolution_clock::now();
+
+            auto durationNaive = std::chrono::duration_cast<std::chrono::microseconds>(end-start);
+            double dur = (double) durationNaive.count() / 1000;
+            std::string durStr = std::to_string(dur);
+
+            bool initialStateInSolution = solutionNaive.find(lts.getInitialState()) != solutionNaive.end();
+            std::cout << "Formula holds for initial state: " << (initialStateInSolution ? "Yes" : "No") << std::endl;
+            std::cout << "Number of fixedpoint iterations: " << NaiveAlgorithm::numberOfIterations << std::endl;
+            std::cout << "Evaluations time: " << durStr << std::endl;
+
+            break;
+        }
+        case Emerson: {
+            auto start = std::chrono::high_resolution_clock::now();
+            const auto& solutionEmerson = EmersonLeiAlgorithm::evaluate(formula, lts);
+            auto end = std::chrono::high_resolution_clock::now();
+
+            auto durationEmerson = std::chrono::duration_cast<std::chrono::microseconds>(end-start);
+            double dur = (double) durationEmerson.count() / 1000;
+            std::string durStr = std::to_string(dur);
+
+            bool initialStateInSolution = solutionEmerson.find(lts.getInitialState()) != solutionEmerson.end();
+            std::cout << "Formula holds for initial state: " << (initialStateInSolution ? "Yes" : "No") << std::endl;
+            std::cout << "Number of fixedpoint iterations: " << EmersonLeiAlgorithm::numberOfIterations << std::endl;
+            std::cout << "Evaluations time: " << durStr << std::endl;
+
+
+            break;
+        }
     }
 }

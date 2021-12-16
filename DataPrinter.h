@@ -7,11 +7,15 @@
 
 #include <string>
 #include <vector>
+#include "Formula.h"
+#include "Lts.h"
 
 class DataPrinter {
 public:
-    void printNumberOfFixedPoints(std::string folderPath);
-    void printTimingTable(std::string folderPath);
+    enum AlgorithmType {Naive, Emerson};
+
+    void printInformationSingleFormulaAndLts(const Formula& formula, const Lts& lts, AlgorithmType algorithmType);
+
     void printTables(std::string folderPath);
 private:
 

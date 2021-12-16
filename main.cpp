@@ -20,30 +20,102 @@
 
 
 
+std::string getInput(std::unordered_set<std::string> recognizedCommands) {
+    std::string inputWord;
+    while(std::cin >> inputWord) {
+        bool inputRecognized = recognizedCommands.find(inputWord) != recognizedCommands.end();
 
+        if(inputRecognized) {
+            return inputWord;
+        } else {
+            std::cout << "input " << inputWord << " is not valid input please try again " << std::endl;
+        }
+
+    }
+    return inputWord;
+}
+
+void printMenu() {
+    std::cout << "Welcome to the ModelMuChecker!" << std::endl;
+    std::cout << "-----" << std::endl;
+    std::cout << "Press 1 to compute all information of a folder containing transitionsystems and formulas in LaTeX format" << std::endl;
+    std::cout << "-----" << std::endl;
+    std::cout << "Press 2 to compute for a specific transition sytem, and specific formula type" << std::endl;
+    std::cout << "-----" << std::endl;
+}
 
 
 
 int main() {
 
+    DataPrinter dataPrinter;
 
-    std::cout << "Welcome to the ModelMuChecker!" << std::endl;
-    std::cout << "-----" << std::endl;
-    std::cout << "Press 1 to compute all information of a folder containing transitionsystems and formulas";
-    std::cout << "-----" << std::endl;
-    std::cout << "Press 2 to compute all" << std::endl;
-    std::cout << "-----" << std::endl;
-
-    std::string filePath = "resources/demanding/";
-    //auto form = parser_space::Parser::parseFormulaFile("resources/demanding/questions_can_be_answered.mcf");
-//    auto form = parser_space::Parser::parseFormulaFile("resources/demanding/questions_will_be_answered.mcf");
-//    form->printFormula();
+    while(true) {
+        printMenu();
 
 
+        std::string inputWord = getInput({"1", "2"});
+
+        if(inputWord == "1") {
+            std::cout << "drag and drop folder to console / provide folder path and press enter" << std::endl;
+            std::cin >> inputWord;
+            try{
+                dataPrinter.printTables(inputWord);
+            } catch (const std::exception& e) {
+                std::cout << "it looks like the folder contains invalid formulas/lts" << std::endl;
+                std::cout << e.what() << std::endl;
+                std::cout << "Please try again";
+                continue;
+            }
+
+        } else if(inputWord == "2") {
+            std::cout << "drag and drop transition system to console / provide file path and press enter" << std::endl;
+            std::cin >> inputWord;
+            try {
+                auto lts = parser_space::Parser::parseLts(inputWord);
+
+                enterFormula:
+
+                std::cout << "drag and drop the formula to console / provide file path and press enter" << std::endl;
+                std::cin >> inputWord;
+                try {
+                    auto form = parser_space::Parser::parseFormulaFile(inputWord);
+                    std::cout << "press n for executing the naive algorithm: " << std::endl;
+                    std::cout << "press e for executing the emerson algorithm: " << std::endl;
+                    inputWord = getInput({"n", "e"});
+                    if(inputWord == "n") {
+                        dataPrinter.printInformationSingleFormulaAndLts(*form, lts, DataPrinter::Naive);
+                    } else if(inputWord == "e") {
+                        dataPrinter.printInformationSingleFormulaAndLts(*form, lts, DataPrinter::Emerson);
+                    } else {
+                        throw std::runtime_error("This should not be reachable. Bug in code!!");
+                    }
 
 
-    DataPrinter printer;
-    printer.printTables("resources/demanding");
+                } catch (const std::exception& e) {
+                    std::cout << "it looks like the formula is not properly formatted" << std::endl;
+                    std::cout << e.what() << std::endl;
+                    std::cout << "Please try again";
+
+                    // This is really bad practice, but okay for a functional interface for now...
+                    goto enterFormula;
+                }
+
+            } catch (const std::exception& e) {
+                std::cout << "it looks like the lts is not properly formatted" << std::endl;
+                std::cout << e.what() << std::endl;
+                std::cout << "Please try again";
+                continue;
+            }
+
+
+        } else {
+            throw std::runtime_error("This should not be reachable. Bug in code!!");
+        }
+    }
+
+
+
 
 
 
