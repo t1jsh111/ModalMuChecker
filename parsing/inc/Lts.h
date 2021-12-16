@@ -11,6 +11,7 @@
 #include <map>
 #include <set>
 #include <unordered_set>
+#include <unordered_map>
 #include <string_view>
 
 
@@ -60,7 +61,7 @@ public:
 
 
 
-public:
+private:
     int initialState;
     int nrOfTransitions;
     int nrOfStates;
@@ -68,8 +69,8 @@ public:
     std::unordered_set<int> states;
 
 
-    std::map<int, std::unordered_set<Transition,Transition::HashFunction>> startStateToTransitions;
-    std::map<int, std::unordered_set<Transition,Transition::HashFunction>> endStateToTransitions;
+    std::unordered_map<int, std::unordered_set<Transition,Transition::HashFunction>> startStateToTransitions;
+    std::unordered_map<int, std::unordered_set<Transition,Transition::HashFunction>> endStateToTransitions;
 
 };
 

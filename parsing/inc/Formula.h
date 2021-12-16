@@ -38,7 +38,7 @@ public:
     getFixedPointVariables() const = 0;
     virtual std::list<std::reference_wrapper<const FixedPointVariable>>
     getFreeFixedPointVariables() const = 0;
-
+private:
     const FormulaType mFormulatype;
 };
 
