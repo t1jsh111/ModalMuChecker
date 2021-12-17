@@ -1,5 +1,1 @@
-mu X. (
-(((<i>true && [ask]false) && [wisdom]false) && [playing]false)
-||
-((((<ask>true && <wisdom>true) && <i>true) && <playing>true) && ((([ask]X && [wisdom]X) && [i]X) && [playing]X))
-)
+nu X. (((( [i]X && [wisdom]X) && [playing]X) && [ask]X ) && <i>true)
