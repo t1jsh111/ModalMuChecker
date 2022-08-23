@@ -1,6 +1,0 @@
-nu X. (
-((([i]X && [wisdom]X) && [ask]X) && [playing]X)
-&&
-[ask] mu Y. (((<wisdom>true && [i]false) && [playing] false) || ((<i>true || <playing>true) &&
-([i]Y  && [playing]Y) ))
-)
