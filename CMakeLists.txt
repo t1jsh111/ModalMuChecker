@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 add_subdirectory(parsing)
 add_subdirectory(formulaAlgorithms)
 
-add_executable(ModalMuChecker main.cpp DataPrinter.cpp NaturalSort.h)
+add_executable(ModalMuChecker main.cpp NaturalSort.h)
 
 target_link_libraries(ModalMuChecker PUBLIC ParsingLibrary)
 target_include_directories(ModalMuChecker PUBLIC parsing/inc)
